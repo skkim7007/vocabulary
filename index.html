@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 3: An Eye for Art - Vocabulary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 3D Flip Card Styles */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transition-transform-700 { transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        
+        /* Game Card Styles */
+        .game-card { cursor: pointer; }
+        .game-card-inner {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .game-card.flipped .game-card-inner { transform: rotateY(180deg); }
+        .game-card-front, .game-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .game-card-front {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            font-size: 2rem;
+        }
+        .game-card-back {
+            background-color: white;
+            transform: rotateY(180deg);
+            border: 2px solid #e2e8f0;
+            font-weight: 600;
+            word-break: keep-all;
+        }
+        .matched .game-card-back {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        /* Hide scrollbar for list */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-5xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                    <i class="fa-solid fa-palette text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 leading-tight">Lesson 3</h1>
+                    <p class="text-sm text-slate-500 font-medium">An Eye for Art</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div class="flex bg-slate-200 p-1 rounded-xl gap-1">
+            <button onclick="switchTab('learn')" id="tab-learn" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-200 bg-white text-indigo-600 shadow-sm">
+                <i class="fa-solid fa-book-open mr-2"></i>단어 학습
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-quiz" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-300">
+                <i class="fa-solid fa-pen-to-square mr-2"></i>퀴즈
+            </button>
+            <button onclick="switchTab('game')" id="tab-game" class="flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-300">
+                <i class="fa-solid fa-gamepad mr-2"></i>게임
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- SECTION: LEARN (Flashcards & List) -->
+        <section id="sec-learn" class="block space-y-8">
+            <!-- Flashcard Container -->
+            <div class="max-w-2xl mx-auto perspective-1000">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <span class="text-sm font-semibold text-slate-500" id="card-counter">1 / 26</span>
+                    <button onclick="shuffleCards()" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1 rounded-full transition-colors">
+                        <i class="fa-solid fa-shuffle mr-1"></i> 셔플
+                    </button>
+                </div>
+                
+                <div id="flashcard" class="relative w-full h-80 sm:h-96 transform-style-3d transition-transform-700 cursor-pointer shadow-lg rounded-2xl group" onclick="flipCard()">
+                    <!-- Front (English) -->
+                    <div class="absolute w-full h-full backface-hidden bg-white border-2 border-slate-100 rounded-2xl flex flex-col items-center justify-center p-8 text-center group-hover:border-indigo-200 transition-colors">
+                        <h2 id="card-eng" class="text-4xl sm:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight"></h2>
+                        <p class="text-slate-400 font-medium"><i class="fa-solid fa-hand-pointer mr-2"></i>클릭해서 뜻 확인</p>
+                    </div>
+                    <!-- Back (Korean & Details) -->
+                    <div class="absolute w-full h-full backface-hidden bg-indigo-600 text-white rounded-2xl rotate-y-180 flex flex-col items-center justify-center p-6 sm:p-10 text-center shadow-inner">
+                        <h3 id="card-kor" class="text-3xl sm:text-4xl font-bold mb-6 text-yellow-300"></h3>
+                        <div class="w-full bg-white/10 rounded-xl p-4 mb-4 backdrop-blur-sm">
+                            <p class="text-xs sm:text-sm text-indigo-100 uppercase tracking-widest mb-1 font-semibold">Definition</p>
+                            <p id="card-def" class="text-sm sm:text-base font-medium leading-relaxed"></p>
+                        </div>
+                        <div class="w-full">
+                            <p class="text-xs sm:text-sm text-indigo-100 uppercase tracking-widest mb-1 font-semibold">Example</p>
+                            <p id="card-ex" class="text-sm sm:text-base italic leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center mt-6 gap-4">
+                    <button onclick="prevCard()" class="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-95">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>이전
+                    </button>
+                    <button onclick="nextCard()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-95">
+                        다음<i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vocabulary List -->
+            <div class="mt-12 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-hidden">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">전체 단어 목록</h3>
+                <div class="overflow-y-auto max-h-96 pr-2 no-scrollbar">
+                    <ul id="vocab-list" class="divide-y divide-slate-100">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: QUIZ -->
+        <section id="sec-quiz" class="hidden max-w-2xl mx-auto">
+            <!-- Quiz Menu -->
+            <div id="quiz-menu" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 text-center">
+                <div class="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fa-solid fa-ranking-star"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">실력 점검 퀴즈</h2>
+                <p class="text-slate-500 mb-8">학습한 단어를 다양한 방식으로 테스트해보세요. (10문제)</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="startQuiz('eng2kor')" class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold py-4 px-6 rounded-xl transition-all border border-indigo-100 flex flex-col items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-language text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span>뜻 고르기 (영 → 한)</span>
+                    </button>
+                    <button onclick="startQuiz('kor2eng')" class="bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 font-bold py-4 px-6 rounded-xl transition-all border border-sky-100 flex flex-col items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-spell-check text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span>단어 고르기 (한 → 영)</span>
+                    </button>
+                    <button onclick="startQuiz('def2eng')" class="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold py-4 px-6 rounded-xl transition-all border border-emerald-100 flex flex-col items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-book-atlas text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span>영영풀이 고르기</span>
+                    </button>
+                    <button onclick="startQuiz('blank')" class="bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 font-bold py-4 px-6 rounded-xl transition-all border border-rose-100 flex flex-col items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-pen-clip text-2xl group-hover:scale-110 transition-transform"></i>
+                        <span>예문 빈칸 채우기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Ongoing -->
+            <div id="quiz-ongoing" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="backToQuizMenu()" class="text-slate-500 hover:text-slate-800 font-medium transition-colors">
+                        <i class="fa-solid fa-xmark mr-1"></i> 퀴즈 종료
+                    </button>
+                    <div class="flex items-center gap-4">
+                        <span id="quiz-progress" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">1 / 10</span>
+                        <span class="text-sm font-bold text-slate-600 bg-slate-200 px-3 py-1 rounded-full">Score: <span id="quiz-score">0</span></span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 text-center mb-6">
+                    <p id="quiz-type-label" class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4"></p>
+                    <h3 id="quiz-question" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-8 word-break-keep"></h3>
+                    
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="quiz-feedback" class="hidden p-4 rounded-xl text-center font-bold text-lg mb-6 transition-all duration-300"></div>
+
+                <div class="text-center">
+                    <button id="next-quiz-btn" onclick="nextQuizQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all active:scale-95 w-full sm:w-auto">
+                        다음 문제 <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Result -->
+            <div id="quiz-result" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-8 sm:p-12 text-center">
+                <div id="result-icon" class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-6"></div>
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">퀴즈 완료!</h2>
+                <p class="text-lg text-slate-500 mb-6">당신의 최종 점수는...</p>
+                <div class="text-6xl font-extrabold text-indigo-600 mb-8"><span id="final-score"></span><span class="text-3xl text-slate-400"> / 10</span></div>
+                <button onclick="backToQuizMenu()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all w-full sm:w-auto">
+                    다른 퀴즈 도전하기
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION: GAME -->
+        <section id="sec-game" class="hidden max-w-4xl mx-auto text-center">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-puzzle-piece text-indigo-500"></i> 단어 짝맞추기 게임
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">같은 뜻을 가진 영어 단어와 한국어 뜻의 카드를 맞추세요.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="bg-slate-100 px-4 py-2 rounded-xl text-center">
+                            <p class="text-xs text-slate-500 font-bold uppercase">Moves</p>
+                            <p id="game-moves" class="text-xl font-extrabold text-slate-800">0</p>
+                        </div>
+                        <div class="bg-indigo-50 px-4 py-2 rounded-xl text-center">
+                            <p class="text-xs text-indigo-500 font-bold uppercase">Time</p>
+                            <p id="game-timer" class="text-xl font-extrabold text-indigo-700">00:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Grid -->
+                <div id="game-board" class="grid grid-cols-4 gap-2 sm:gap-4 w-full aspect-square sm:aspect-auto sm:h-[600px] mb-6 perspective-1000">
+                    <!-- Cards injected by JS -->
+                </div>
+
+                <button onclick="initGame()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all active:scale-95">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> 게임 다시 시작
+                </button>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Raw Data and Scripts -->
+    <script>
+        const vocabData = [
+            { id: 1, eng: "artwork", kor: "미술품", def: "a painting, drawing, or other piece of art", ex: "She created an artwork for the school festival.", blankEx: "She created an _______ for the school festival." },
+            { id: 2, eng: "century", kor: "세기, 100년", def: "a period of 100 years", ex: "The 21st century began in 2001.", blankEx: "The 21st _______ began in 2001." },
+            { id: 3, eng: "choice", kor: "선택", def: "the act of picking or deciding between two or more possibilities", ex: "Think carefully before making a choice.", blankEx: "Think carefully before making a _______." },
+            { id: 4, eng: "confuse", kor: "~을 …와 혼동하다", def: "to mistakenly think that one thing is another thing because they seem similar", ex: "Don’t confuse quantity with quality.", blankEx: "Don’t _______ quantity with quality." },
+            { id: 5, eng: "dark", kor: "어두운, 짙은", def: "having little or no light; deep in color", ex: "It is too dark outside at night.", blankEx: "It is too _______ outside at night." },
+            { id: 6, eng: "differ", kor: "다르다", def: "to be not the same as something or someone else", ex: "Your opinion may differ from mine.", blankEx: "Your opinion may _______ from mine." },
+            { id: 7, eng: "difference", kor: "차이, 다름", def: "the way in which two or more things are not the same", ex: "What’s the difference between a frog and a toad?", blankEx: "What’s the _______ between a frog and a toad?" },
+            { id: 8, eng: "exhibit", kor: "전시회", def: "a public display of art, objects, or information for people to view", ex: "You can see the history of dinosaurs at the exhibit.", blankEx: "You can see the history of dinosaurs at the _______." },
+            { id: 9, eng: "focus", kor: "초점, 중점; 집중하다", def: "the center of attention or activity; the main point / to give all your attention to something", ex: "You should focus on your studies.", blankEx: "You should _______ on your studies." },
+            { id: 10, eng: "helpful", kor: "도움이 되는", def: "giving help or being useful to someone", ex: "It is helpful to study a little every day.", blankEx: "It is _______ to study a little every day." },
+            { id: 11, eng: "instead", kor: "대신에", def: "in place of someone or something; as another choice", ex: "I didn’t go to the park; I stayed home instead.", blankEx: "I didn’t go to the park; I stayed home _______." },
+            { id: 12, eng: "landscape", kor: "풍경, 풍경화", def: "a view of an area of land, or a picture showing a view of the countryside", ex: "The artist painted a beautiful landscape of the lake.", blankEx: "The artist painted a beautiful _______ of the lake." },
+            { id: 13, eng: "light", kor: "(색깔이) 연한, 옅은", def: "pale or not dark in color", ex: "She wore a light blue dress to the party.", blankEx: "She wore a _______ blue dress to the party." },
+            { id: 14, eng: "master", kor: "대가, 달인", def: "a person who is very skilled at something", ex: "Leonardo da Vinci was truly a master of art.", blankEx: "Leonardo da Vinci was truly a _______ of art." },
+            { id: 15, eng: "mix up", kor: "혼동하다, 헷갈리다", def: "to confuse one thing or person with another", ex: "She mixed up salt with sugar.", blankEx: "She _______ salt with sugar." },
+            { id: 16, eng: "nature", kor: "자연", def: "the physical world including all plants, animals, landscapes, and things not made by people", ex: "We went on a hike to enjoy the beauty of nature.", blankEx: "We went on a hike to enjoy the beauty of _______." },
+            { id: 17, eng: "praise", kor: "칭찬하다", def: "to say that someone or something is good or has done well", ex: "The teacher praised the student for his hard work.", blankEx: "The teacher _______ the student for his hard work." },
+            { id: 18, eng: "probably", kor: "아마", def: "used to say that something is likely to happen or be true", ex: "I'll take an umbrella because it'll probably rain.", blankEx: "I'll take an umbrella because it'll _______ rain." },
+            { id: 19, eng: "realize", kor: "깨닫다, 알아차리다", def: "to become aware of something or understand something that you did not know before", ex: "I didn’t realize that yesterday was my sister’s birthday.", blankEx: "I didn’t _______ that yesterday was my sister’s birthday." },
+            { id: 20, eng: "series", kor: "연속물", def: "a number of things or events that come one after another in order", ex: "I watched a series of superhero movies.", blankEx: "I watched a _______ of superhero movies." },
+            { id: 21, eng: "similar", kor: "비슷한, 닮은", def: "almost the same but not exactly the same", ex: "We have similar tastes in music.", blankEx: "We have _______ tastes in music." },
+            { id: 22, eng: "sound", kor: "~하게 들리다", def: "to seem or appear when you hear it", ex: "That song sounds amazing!", blankEx: "That song _______ amazing!" },
+            { id: 23, eng: "strange", kor: "이상한", def: "unusual or surprising in a way that is difficult to understand", ex: "I found something strange on the street.", blankEx: "I found something _______ on the street." },
+            { id: 24, eng: "subject", kor: "대상, 주제", def: "a person or thing that is being discussed, studied, or dealt with", ex: "Focus the camera on the subject.", blankEx: "Focus the camera on the _______." },
+            { id: 25, eng: "tell apart", kor: "~을 구별하다", def: "to see or notice the difference between two or more people or things", ex: "The brothers look so similar that I can’t tell them apart.", blankEx: "The brothers look so similar that I can’t _______ them apart." },
+            { id: 26, eng: "unique", kor: "독특한", def: "being the only one of its kind; different from everything else", ex: "She has a unique style of painting.", blankEx: "She has a _______ style of painting." }
+        ];
+
+        /* ================= TAB NAVIGATION ================= */
+        function switchTab(tabId) {
+            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+
+            const activeClass = ['bg-white', 'text-indigo-600', 'shadow-sm'];
+            const inactiveClass = ['text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-300'];
+
+            ['learn', 'quiz', 'game'].forEach(id => {
+                const btn = document.getElementById(`tab-${id}`);
+                if (id === tabId) {
+                    btn.classList.add(...activeClass);
+                    btn.classList.remove(...inactiveClass);
+                } else {
+                    btn.classList.remove(...activeClass);
+                    btn.classList.add(...inactiveClass);
+                }
+            });
+
+            if (tabId === 'game') initGame();
+        }
+
+        /* ================= LEARN TAB LOGIC ================= */
+        let currentCardIndex = 0;
+        let learnOrder = [...vocabData];
+
+        function shuffleCards() {
+            learnOrder = learnOrder.sort(() => Math.random() - 0.5);
+            currentCardIndex = 0;
+            document.getElementById('flashcard').classList.remove('rotate-y-180');
+            setTimeout(renderCard, 200); // Wait for unflip animation
+        }
+
+        function renderCard() {
+            const word = learnOrder[currentCardIndex];
+            document.getElementById('card-eng').textContent = word.eng;
+            document.getElementById('card-kor').textContent = word.kor;
+            document.getElementById('card-def').textContent = word.def;
+            document.getElementById('card-ex').textContent = word.ex;
+            document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / ${learnOrder.length}`;
+            
+            // Generate List if not done
+            const listEl = document.getElementById('vocab-list');
+            if(listEl.children.length === 0) {
+                vocabData.forEach(v => {
+                    const li = document.createElement('li');
+                    li.className = 'py-3 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center hover:bg-slate-50 transition-colors px-2 rounded-lg';
+                    li.innerHTML = `
+                        <div class="flex items-center gap-3 w-full sm:w-1/3">
+                            <span class="font-extrabold text-indigo-600 text-lg">${v.eng}</span>
+                        </div>
+                        <div class="w-full sm:w-2/3 mt-1 sm:mt-0 text-slate-600 text-sm">
+                            <span class="font-bold text-slate-800 bg-yellow-100 px-2 py-0.5 rounded mr-2">${v.kor}</span> 
+                            <span class="hidden sm:inline">${v.def}</span>
+                        </div>
+                    `;
+                    listEl.appendChild(li);
+                });
+            }
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('rotate-y-180');
+        }
+
+        function nextCard() {
+            document.getElementById('flashcard').classList.remove('rotate-y-180');
+            setTimeout(() => {
+                currentCardIndex = (currentCardIndex + 1) % learnOrder.length;
+                renderCard();
+            }, 200);
+        }
+
+        function prevCard() {
+            document.getElementById('flashcard').classList.remove('rotate-y-180');
+            setTimeout(() => {
+                currentCardIndex = (currentCardIndex - 1 + learnOrder.length) % learnOrder.length;
+                renderCard();
+            }, 200);
+        }
+
+
+        /* ================= QUIZ TAB LOGIC ================= */
+        let currentQuizQuestions = [];
+        let currentQuizIndex = 0;
+        let score = 0;
+        let quizMode = '';
+        const TOTAL_QUIZ_QUESTIONS = 10;
+
+        function startQuiz(mode) {
+            quizMode = mode;
+            score = 0;
+            currentQuizIndex = 0;
+            currentQuizQuestions = generateQuizBatch(TOTAL_QUIZ_QUESTIONS, mode);
+            
+            document.getElementById('quiz-menu').classList.add('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-ongoing').classList.remove('hidden');
+            
+            let typeLabel = "";
+            if(mode === 'eng2kor') typeLabel = "뜻 고르기";
+            if(mode === 'kor2eng') typeLabel = "단어 고르기";
+            if(mode === 'def2eng') typeLabel = "영영풀이 고르기";
+            if(mode === 'blank') typeLabel = "예문 빈칸 채우기";
+            document.getElementById('quiz-type-label').textContent = typeLabel;
+
+            renderQuizQuestion();
+        }
+
+        function generateQuizBatch(num, mode) {
+            let shuffledVocab = [...vocabData].sort(() => Math.random() - 0.5).slice(0, num);
+            return shuffledVocab.map(targetWord => {
+                let options = [targetWord];
+                let otherWords = [...vocabData].filter(w => w.id !== targetWord.id).sort(() => Math.random() - 0.5);
+                options.push(otherWords[0], otherWords[1], otherWords[2]);
+                options = options.sort(() => Math.random() - 0.5);
+                return { target: targetWord, options: options };
+            });
+        }
+
+        function renderQuizQuestion() {
+            const quizData = currentQuizQuestions[currentQuizIndex];
+            const target = quizData.target;
+            const qEl = document.getElementById('quiz-question');
+            
+            if(quizMode === 'eng2kor') qEl.textContent = target.eng;
+            if(quizMode === 'kor2eng') qEl.textContent = target.kor;
+            if(quizMode === 'def2eng') qEl.textContent = target.def;
+            if(quizMode === 'blank') qEl.textContent = target.blankEx;
+
+            document.getElementById('quiz-progress').textContent = `${currentQuizIndex + 1} / ${TOTAL_QUIZ_QUESTIONS}`;
+            document.getElementById('quiz-score').textContent = score;
+            
+            const optionsEl = document.getElementById('quiz-options');
+            optionsEl.innerHTML = '';
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('next-quiz-btn').classList.add('hidden');
+
+            quizData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full bg-white border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 font-bold py-4 px-6 rounded-xl transition-all option-btn';
+                
+                let optText = '';
+                if(quizMode === 'eng2kor') optText = opt.kor;
+                if(quizMode === 'kor2eng' || quizMode === 'def2eng' || quizMode === 'blank') optText = opt.eng;
+                
+                btn.textContent = optText;
+                btn.onclick = () => checkAnswer(opt.id, target.id, btn);
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedId, targetId, btnEl) {
+            // Disable all buttons
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            
+            const isCorrect = selectedId === targetId;
+            const feedbackEl = document.getElementById('quiz-feedback');
+            
+            if (isCorrect) {
+                score++;
+                btnEl.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                btnEl.classList.remove('bg-white', 'border-slate-200');
+                feedbackEl.textContent = "정답입니다! 👏";
+                feedbackEl.className = "block p-4 rounded-xl text-center font-bold text-lg mb-6 bg-green-100 text-green-700";
+            } else {
+                btnEl.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+                btnEl.classList.remove('bg-white', 'border-slate-200');
+                feedbackEl.textContent = "틀렸습니다. 🥲";
+                feedbackEl.className = "block p-4 rounded-xl text-center font-bold text-lg mb-6 bg-red-100 text-red-700";
+                
+                // Highlight correct answer
+                document.querySelectorAll('.option-btn').forEach(b => {
+                    const quizData = currentQuizQuestions[currentQuizIndex];
+                    let optText = '';
+                    if(quizMode === 'eng2kor') optText = quizData.target.kor;
+                    if(['kor2eng', 'def2eng', 'blank'].includes(quizMode)) optText = quizData.target.eng;
+                    
+                    if (b.textContent === optText) {
+                        b.classList.add('border-green-500', 'border-2', 'bg-green-50');
+                    }
+                });
+            }
+            
+            document.getElementById('quiz-score').textContent = score;
+            document.getElementById('next-quiz-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < TOTAL_QUIZ_QUESTIONS) {
+                renderQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-ongoing').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('final-score').textContent = score;
+            
+            const iconEl = document.getElementById('result-icon');
+            if(score >= 8) {
+                iconEl.innerHTML = '<i class="fa-solid fa-crown"></i>';
+                iconEl.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-6 bg-yellow-100 text-yellow-500";
+            } else if (score >= 5) {
+                iconEl.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+                iconEl.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-6 bg-blue-100 text-blue-500";
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-book"></i>';
+                iconEl.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-6 bg-slate-100 text-slate-500";
+            }
+        }
+
+        function backToQuizMenu() {
+            document.getElementById('quiz-ongoing').classList.add('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-menu').classList.remove('hidden');
+        }
+
+        /* ================= GAME TAB LOGIC ================= */
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let matchedPairs = 0;
+        let moves = 0;
+        let gameTime = 0;
+        let gameTimerInterval = null;
+
+        function initGame() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            
+            // Reset state
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null;
+            secondCard = null;
+            matchedPairs = 0;
+            moves = 0;
+            gameTime = 0;
+            document.getElementById('game-moves').textContent = moves;
+            document.getElementById('game-timer').textContent = "00:00";
+            clearInterval(gameTimerInterval);
+            
+            // Select 8 random words
+            let selectedWords = [...vocabData].sort(() => Math.random() - 0.5).slice(0, 8);
+            
+            // Create pairs
+            let cardsArray = [];
+            selectedWords.forEach(w => {
+                cardsArray.push({ id: w.id, text: w.eng, type: 'eng' });
+                cardsArray.push({ id: w.id, text: w.kor, type: 'kor' });
+            });
+            
+            cardsArray.sort(() => Math.random() - 0.5); // Shuffle
+            
+            cardsArray.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'game-card rounded-xl';
+                cardEl.dataset.id = card.id;
+                
+                // Scale text down if it's long Korean meaning
+                const textClass = card.text.length > 8 ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg';
+
+                cardEl.innerHTML = `
+                    <div class="game-card-inner">
+                        <div class="game-card-front">
+                            <i class="fa-solid fa-question opacity-50"></i>
+                        </div>
+                        <div class="game-card-back ${textClass} text-slate-700">
+                            ${card.text}
+                        </div>
+                    </div>
+                `;
+                cardEl.addEventListener('click', flipGameCard);
+                board.appendChild(cardEl);
+            });
+
+            // Start timer
+            gameTimerInterval = setInterval(() => {
+                gameTime++;
+                const m = String(Math.floor(gameTime / 60)).padStart(2, '0');
+                const s = String(gameTime % 60).padStart(2, '0');
+                document.getElementById('game-timer').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function flipGameCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add('flipped');
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            moves++;
+            document.getElementById('game-moves').textContent = moves;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.id === secondCard.dataset.id;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() {
+            firstCard.removeEventListener('click', flipGameCard);
+            secondCard.removeEventListener('click', flipGameCard);
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+            matchedPairs++;
+
+            if(matchedPairs === 8) {
+                clearInterval(gameTimerInterval);
+                setTimeout(() => {
+                    alert(`🎉 축하합니다! ${moves}번의 시도 만에 완료했습니다! (시간: ${document.getElementById('game-timer').textContent})`);
+                }, 500);
+            }
+            resetBoard();
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // Init App
+        window.onload = () => {
+            renderCard();
+        };
+
+    </script>
+</body>
+</html>
