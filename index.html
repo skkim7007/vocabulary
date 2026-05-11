@@ -15,20 +15,17 @@
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        .transition-transform-700 { transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); } /* More bouncy flip */
+        .transition-transform-700 { transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
         
         /* Details Fade In */
-        .details-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; height: 0; overflow: hidden; }
-        .details-visible { opacity: 1; transform: translateY(0); pointer-events: auto; height: auto; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 1.5rem; }
+        .details-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; height: 0; overflow: hidden; margin-top: 0; }
+        .details-visible { opacity: 1; transform: translateY(0); pointer-events: auto; height: auto; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 1rem; }
 
         /* Fancy Gradients */
-        .gradient-text { background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .bg-gradient-primary { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%); }
         .bg-gradient-card-front { background: linear-gradient(to right bottom, #ffffff, #fdfbfb); }
         .bg-gradient-card-back { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-        .bg-gradient-quiz { background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%); }
 
-        /* Game Animations */
+        /* Animations */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-8px) rotate(-2deg); }
@@ -52,18 +49,51 @@
         }
         .float-animation { animation: float 3s ease-in-out infinite; }
 
-        /* Soft Shadows */
-        .shadow-soft { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); }
-        .shadow-glow { box-shadow: 0 0 15px rgba(161, 140, 209, 0.5); }
-
         /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Quiz Custom Radio/Button */
-        .quiz-option { transition: all 0.2s ease; }
-        .quiz-option:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #a18cd1; }
-        .quiz-option:active { transform: translateY(0); }
+        /* Game Card Styles (Memory Game) */
+        .memory-card { cursor: pointer; }
+        .memory-card-inner {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .memory-card-front, .memory-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .memory-card-front {
+            background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+            color: white;
+            font-size: 2rem;
+        }
+        .memory-card-back {
+            background-color: white;
+            transform: rotateY(180deg);
+            border: 2px solid #ddd6fe;
+            font-weight: 700;
+            word-break: keep-all;
+            color: #4c1d95;
+        }
+        .matched .memory-card-back {
+            background-color: #dcfce7;
+            border-color: #4ade80;
+            color: #166534;
+        }
     </style>
 </head>
 <body class="bg-indigo-50/30 min-h-screen text-slate-700">
@@ -86,7 +116,7 @@
     <!-- Navigation Tabs -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div class="flex bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 gap-1.5 overflow-x-auto no-scrollbar">
-            <button onclick="switchTab('learn')" id="tab-learn" class="flex-1 min-w-[100px] py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 shadow-sm relative overflow-hidden">
+            <button onclick="switchTab('learn')" id="tab-learn" class="flex-1 min-w-[100px] py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 shadow-sm">
                 <i class="fa-solid fa-layer-group mr-2"></i>단어 카드
             </button>
             <button onclick="switchTab('quiz')" id="tab-quiz" class="flex-1 min-w-[100px] py-3 px-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
@@ -110,20 +140,20 @@
                         <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                         <span class="text-sm font-black text-slate-600" id="card-counter">1 / 26</span>
                     </div>
-                    <button onclick="shuffleCards()" class="text-sm font-bold text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-500 px-4 py-2 rounded-full transition-all border border-purple-100 shadow-sm hover:shadow-md flex items-center gap-2 group">
+                    <button onclick="shuffleCards()" class="text-sm font-bold text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-500 px-4 py-2 rounded-full transition-all shadow-sm flex items-center gap-2 group">
                         <i class="fa-solid fa-dice group-hover:rotate-180 transition-transform duration-500"></i> 단어 섞기
                     </button>
                 </div>
                 
                 <!-- Flashcard -->
-                <div id="flashcard" class="relative w-full h-[22rem] sm:h-[26rem] transform-style-3d transition-transform-700 cursor-pointer group" onclick="handleCardClick()">
+                <div id="flashcard" class="relative w-full h-[24rem] sm:h-[28rem] transform-style-3d transition-transform-700 cursor-pointer group">
                     
                     <!-- Front (English) -->
-                    <div class="absolute w-full h-full backface-hidden bg-gradient-card-front border-2 border-slate-100 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center shadow-soft group-hover:shadow-xl group-hover:border-purple-200 transition-all duration-300">
+                    <div onclick="handleCardClick('front')" class="absolute w-full h-full backface-hidden bg-gradient-card-front border-2 border-slate-100 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center shadow-lg group-hover:shadow-xl transition-all duration-300">
                         <div class="w-16 h-16 bg-purple-100 text-purple-500 rounded-full flex items-center justify-center text-3xl mb-6 float-animation shadow-inner">
                             <i class="fa-solid fa-language"></i>
                         </div>
-                        <h2 id="card-eng" class="text-5xl sm:text-6xl font-black text-slate-800 mb-6 tracking-tight drop-shadow-sm"></h2>
+                        <h2 id="card-eng" class="text-5xl sm:text-6xl font-black text-slate-800 mb-6 tracking-tight"></h2>
                         <div class="bg-slate-100 px-4 py-2 rounded-full text-slate-500 font-bold text-sm flex items-center gap-2">
                             <i class="fa-solid fa-hand-pointer text-purple-400"></i> 뜻 확인하기
                         </div>
@@ -132,265 +162,210 @@
                     <!-- Back (Korean & Details) -->
                     <div class="absolute w-full h-full backface-hidden bg-gradient-card-back text-white rounded-[2rem] rotate-y-180 flex flex-col items-center justify-center p-6 sm:p-10 text-center shadow-xl border border-white/20 overflow-hidden">
                         
-                        <!-- Background decoration -->
-                        <i class="fa-solid fa-quote-right absolute -bottom-6 -right-6 text-9xl text-white/10 rotate-12"></i>
+                        <div class="w-full h-full flex flex-col items-center justify-center" onclick="handleCardClick('back')">
+                            <!-- Always visible on back: Korean Meaning -->
+                            <h3 id="card-kor" class="text-4xl sm:text-5xl font-black text-white drop-shadow-md z-10 transition-transform duration-500 mb-2"></h3>
+                            
+                            <!-- Hidden: Definition -->
+                            <div id="card-def-container" class="details-hidden w-full z-10 flex flex-col gap-3">
+                                <div class="w-full bg-white/20 rounded-2xl p-4 backdrop-blur-md border border-white/30 text-left">
+                                    <p class="text-xs text-purple-100 uppercase tracking-widest mb-1.5 font-bold"><i class="fa-solid fa-book-open"></i> 영영 풀이</p>
+                                    <p id="card-def" class="text-sm sm:text-base font-semibold leading-relaxed text-white drop-shadow-sm"></p>
+                                </div>
+                            </div>
 
-                        <!-- Always visible on back: Korean Meaning -->
-                        <h3 id="card-kor" class="text-4xl sm:text-5xl font-black text-white drop-shadow-md z-10 transition-transform duration-500 mb-2"></h3>
+                            <!-- Hidden: Example -->
+                            <div id="card-ex-container" class="details-hidden w-full z-10">
+                                <div class="w-full bg-black/20 rounded-2xl p-4 backdrop-blur-md border border-white/20 text-left">
+                                    <p class="text-xs text-pink-200 uppercase tracking-widest mb-1.5 font-bold"><i class="fa-solid fa-pen-nib"></i> 예문</p>
+                                    <p id="card-ex" class="text-sm sm:text-base italic leading-relaxed text-pink-50 font-medium"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Instruction -->
+                            <div id="card-instruction" class="mt-auto pt-4 z-10 text-white/80 text-sm font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-hand-pointer animate-pulse"></i> <span>영영풀이 보기</span>
+                            </div>
+                        </div>
                         
-                        <!-- Initially hidden: Definition & Example -->
-                        <div id="card-details" class="details-hidden w-full z-10 flex flex-col gap-3">
-                            <div class="w-full bg-white/20 rounded-2xl p-4 sm:p-5 backdrop-blur-md border border-white/30 shadow-inner text-left">
-                                <p class="text-xs text-purple-100 uppercase tracking-widest mb-1.5 font-bold flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 영영 풀이</p>
-                                <p id="card-def" class="text-sm sm:text-base font-semibold leading-relaxed text-white drop-shadow-sm"></p>
-                            </div>
-                            <div class="w-full bg-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md border border-white/20 text-left">
-                                <p class="text-xs text-pink-100 uppercase tracking-widest mb-1.5 font-bold flex items-center gap-2"><i class="fa-solid fa-pen-nib"></i> 예문</p>
-                                <p id="card-ex" class="text-sm sm:text-base italic leading-relaxed text-pink-50 font-medium"></p>
-                            </div>
-                        </div>
-
-                        <!-- Instruction for next step -->
-                        <div id="card-instruction" class="mt-6 z-10 bg-black/20 px-4 py-2 rounded-full text-white/90 text-sm font-bold backdrop-blur-sm border border-white/10">
-                            <i class="fa-solid fa-hand-pointer mr-2"></i> 영영풀이 & 예문 보기
-                        </div>
+                        <!-- Manual Example Button (Visible only when Def is shown) -->
+                        <button id="btn-show-ex" onclick="showExample(event)" class="absolute bottom-6 right-6 z-20 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl shadow-lg transition-all hidden active:scale-95 text-sm">
+                            <i class="fa-solid fa-comment-dots mr-1"></i> 예문 보기
+                        </button>
                     </div>
                 </div>
 
                 <!-- Navigation Controls -->
                 <div class="flex justify-between items-center mt-8 gap-4">
-                    <button onclick="prevCard()" class="flex-1 bg-white border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 text-slate-500 font-black text-lg py-4 px-4 rounded-2xl shadow-sm transition-all active:scale-95 flex justify-center items-center gap-2">
-                        <i class="fa-solid fa-chevron-left"></i> 이전 단어
+                    <button onclick="prevCard()" class="flex-1 bg-white border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50 text-slate-500 font-black text-lg py-4 px-4 rounded-2xl shadow-sm transition-all active:scale-95 flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-chevron-left"></i> 이전
                     </button>
-                    <button onclick="nextCard()" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-lg py-4 px-4 rounded-2xl shadow-md shadow-purple-500/30 transition-all active:scale-95 flex justify-center items-center gap-2">
-                        다음 단어 <i class="fa-solid fa-chevron-right"></i>
+                    <button onclick="nextCard()" class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-lg py-4 px-4 rounded-2xl shadow-md transition-all active:scale-95 flex justify-center items-center gap-2">
+                        다음 <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Vocabulary List -->
-            <div class="mt-16 bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8 overflow-hidden">
+            <div class="mt-16 bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
                     <div class="bg-indigo-100 p-2 rounded-lg text-indigo-500"><i class="fa-solid fa-list-ul"></i></div>
                     <h3 class="text-xl font-black text-slate-800">단어 한눈에 보기</h3>
                 </div>
                 <div class="overflow-y-auto max-h-[400px] pr-4 no-scrollbar">
-                    <ul id="vocab-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Populated by JS -->
-                    </ul>
+                    <ul id="vocab-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></ul>
                 </div>
             </div>
         </section>
 
         <!-- SECTION: QUIZ -->
         <section id="sec-quiz" class="hidden max-w-3xl mx-auto">
-            <!-- Quiz Menu -->
-            <div id="quiz-menu" class="bg-white rounded-3xl shadow-soft border border-slate-100 p-8 sm:p-12 text-center">
-                <div class="w-24 h-24 bg-gradient-to-tr from-yellow-200 to-orange-300 rounded-3xl flex items-center justify-center text-5xl text-orange-600 mx-auto mb-6 shadow-inner transform rotate-3">
+             <div id="quiz-menu" class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 sm:p-12 text-center">
+                <div class="w-24 h-24 bg-gradient-to-tr from-yellow-200 to-orange-300 rounded-3xl flex items-center justify-center text-5xl text-orange-600 mx-auto mb-6 transform rotate-3">
                     <i class="fa-solid fa-medal"></i>
                 </div>
                 <h2 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">실력 점검 퀴즈</h2>
                 <p class="text-slate-500 mb-10 font-medium">자신 있는 모드를 선택해서 10문제를 풀어보세요!</p>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <button onclick="startQuiz('eng2kor')" class="bg-white hover:bg-blue-50 border-2 border-blue-100 hover:border-blue-400 text-blue-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group shadow-sm">
-                        <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-a text-2xl text-blue-500"></i>
-                        </div>
+                    <button onclick="startQuiz('eng2kor')" class="bg-white hover:bg-blue-50 border-2 border-blue-100 hover:border-blue-400 text-blue-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group">
+                        <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fa-solid fa-a text-2xl text-blue-500"></i></div>
                         <span class="font-black text-lg">뜻 고르기</span>
                         <span class="text-xs font-bold text-blue-400 bg-blue-100/50 px-2 py-1 rounded">영어 → 한국어</span>
                     </button>
-                    
-                    <button onclick="startQuiz('kor2eng')" class="bg-white hover:bg-green-50 border-2 border-green-100 hover:border-green-400 text-green-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group shadow-sm">
-                        <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-k text-2xl text-green-500"></i>
-                        </div>
+                    <button onclick="startQuiz('kor2eng')" class="bg-white hover:bg-green-50 border-2 border-green-100 hover:border-green-400 text-green-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group">
+                        <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fa-solid fa-k text-2xl text-green-500"></i></div>
                         <span class="font-black text-lg">단어 고르기</span>
                         <span class="text-xs font-bold text-green-400 bg-green-100/50 px-2 py-1 rounded">한국어 → 영어</span>
                     </button>
-                    
-                    <button onclick="startQuiz('def2eng')" class="bg-white hover:bg-purple-50 border-2 border-purple-100 hover:border-purple-400 text-purple-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group shadow-sm">
-                        <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-book-atlas text-2xl text-purple-500"></i>
-                        </div>
+                    <button onclick="startQuiz('def2eng')" class="bg-white hover:bg-purple-50 border-2 border-purple-100 hover:border-purple-400 text-purple-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group">
+                        <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fa-solid fa-book-atlas text-2xl text-purple-500"></i></div>
                         <span class="font-black text-lg">영영풀이 매칭</span>
                         <span class="text-xs font-bold text-purple-400 bg-purple-100/50 px-2 py-1 rounded">의미 읽고 단어 찾기</span>
                     </button>
-                    
-                    <button onclick="startQuiz('blank')" class="bg-white hover:bg-rose-50 border-2 border-rose-100 hover:border-rose-400 text-rose-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group shadow-sm">
-                        <div class="bg-rose-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-pen-clip text-2xl text-rose-500"></i>
-                        </div>
+                    <button onclick="startQuiz('blank')" class="bg-white hover:bg-rose-50 border-2 border-rose-100 hover:border-rose-400 text-rose-800 py-6 px-6 rounded-2xl transition-all flex flex-col items-center justify-center gap-3 group">
+                        <div class="bg-rose-100 w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fa-solid fa-pen-clip text-2xl text-rose-500"></i></div>
                         <span class="font-black text-lg">예문 빈칸 채우기</span>
                         <span class="text-xs font-bold text-rose-400 bg-rose-100/50 px-2 py-1 rounded">문맥 파악하기</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Quiz Ongoing -->
+            <!-- Quiz Ongoing & Result (Same structure as before) -->
             <div id="quiz-ongoing" class="hidden">
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                    <button onclick="backToQuizMenu()" class="text-slate-400 hover:text-rose-500 font-bold transition-colors flex items-center gap-2 bg-slate-50 hover:bg-rose-50 px-3 py-2 rounded-xl">
-                        <i class="fa-solid fa-xmark"></i> 그만하기
-                    </button>
+                <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-2xl border border-slate-100">
+                    <button onclick="backToQuizMenu()" class="text-slate-400 hover:text-rose-500 font-bold transition-colors flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl"><i class="fa-solid fa-xmark"></i> 그만하기</button>
                     <div class="flex items-center gap-4">
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs font-bold text-slate-400 uppercase">진행도</span>
-                            <span id="quiz-progress" class="font-black text-indigo-600">1 / 10</span>
-                        </div>
+                        <div class="flex flex-col items-end"><span class="text-xs font-bold text-slate-400 uppercase">진행도</span><span id="quiz-progress" class="font-black text-indigo-600">1 / 10</span></div>
                         <div class="h-8 w-px bg-slate-200"></div>
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs font-bold text-slate-400 uppercase">현재 점수</span>
-                            <span class="font-black text-orange-500 text-lg leading-none" id="quiz-score">0</span>
-                        </div>
+                        <div class="flex flex-col items-end"><span class="text-xs font-bold text-slate-400 uppercase">점수</span><span class="font-black text-orange-500 text-lg leading-none" id="quiz-score">0</span></div>
                     </div>
                 </div>
 
-                <!-- Question Area -->
-                <div class="bg-white rounded-3xl shadow-soft border border-slate-100 p-8 sm:p-12 text-center mb-6 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 to-indigo-400"></div>
-                    
-                    <span id="quiz-type-label" class="inline-block bg-indigo-50 text-indigo-600 font-bold text-xs px-3 py-1 rounded-full mb-6 uppercase tracking-wider"></span>
-                    
-                    <h3 id="quiz-question" class="text-2xl sm:text-4xl font-black text-slate-800 mb-10 word-break-keep leading-tight drop-shadow-sm"></h3>
-                    
-                    <!-- Options -->
-                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                        <!-- Options injected via JS -->
-                    </div>
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 sm:p-12 text-center mb-6 relative overflow-hidden">
+                    <span id="quiz-type-label" class="inline-block bg-indigo-50 text-indigo-600 font-bold text-xs px-3 py-1 rounded-full mb-6 uppercase"></span>
+                    <h3 id="quiz-question" class="text-2xl sm:text-3xl font-black text-slate-800 mb-10 word-break-keep"></h3>
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left"></div>
                 </div>
 
-                <!-- Feedback Area -->
-                <div id="quiz-feedback" class="hidden p-5 rounded-2xl text-center font-black text-xl mb-6 transition-all duration-300 shadow-sm border"></div>
+                <div id="quiz-feedback" class="hidden p-5 rounded-2xl text-center font-black text-xl mb-6"></div>
 
-                <!-- Next Button -->
                 <div class="text-center">
-                    <button id="next-quiz-btn" onclick="nextQuizQuestion()" class="hidden bg-slate-800 hover:bg-black text-white font-black py-4 px-12 rounded-2xl shadow-xl transition-all active:scale-95 w-full sm:w-auto text-lg flex items-center justify-center gap-3 mx-auto">
-                        다음 문제로 <i class="fa-solid fa-arrow-right"></i>
+                    <button id="next-quiz-btn" onclick="nextQuizQuestion()" class="hidden bg-slate-800 hover:bg-black text-white font-black py-4 px-12 rounded-2xl transition-all active:scale-95 mx-auto">
+                        다음 문제 <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Quiz Result -->
-            <div id="quiz-result" class="hidden bg-white rounded-3xl shadow-soft border border-slate-100 p-10 sm:p-16 text-center">
-                <div id="result-icon" class="w-32 h-32 mx-auto rounded-[2.5rem] flex items-center justify-center text-6xl mb-8 shadow-inner transform rotate-6"></div>
+            <div id="quiz-result" class="hidden bg-white rounded-3xl border border-slate-100 p-10 sm:p-16 text-center">
+                <div id="result-icon" class="w-32 h-32 mx-auto rounded-[2.5rem] flex items-center justify-center text-6xl mb-8 transform rotate-6"></div>
                 <h2 class="text-4xl font-black text-slate-800 mb-3">퀴즈 완료!</h2>
-                <p class="text-slate-500 mb-8 font-medium">수고하셨습니다. 당신의 최종 점수는...</p>
-                
-                <div class="relative inline-block mb-10">
-                    <div class="absolute inset-0 bg-yellow-200 rounded-full blur-xl opacity-50"></div>
-                    <div class="relative text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-pink-500 drop-shadow-sm">
-                        <span id="final-score"></span><span class="text-4xl text-slate-300">/10</span>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button onclick="backToQuizMenu()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rotate-right"></i> 다른 모드 도전
-                    </button>
-                    <button onclick="switchTab('learn')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-8 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 border border-slate-200">
-                        단어 다시 학습하기
-                    </button>
-                </div>
+                <div class="text-8xl font-black text-orange-500 mb-10"><span id="final-score"></span><span class="text-4xl text-slate-300">/10</span></div>
+                <button onclick="backToQuizMenu()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl mx-auto">다른 모드 도전</button>
             </div>
         </section>
 
-        <!-- SECTION: GAME (Word Defense) -->
+        <!-- SECTION: GAME -->
         <section id="sec-game" class="hidden max-w-4xl mx-auto">
             
-            <!-- Game Start Menu -->
-            <div id="game-start-menu" class="bg-white rounded-3xl shadow-soft border border-slate-100 p-10 text-center relative overflow-hidden">
-                <!-- BG Decoration -->
-                <div class="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full blur-3xl opacity-50"></div>
-                <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-gradient-to-tr from-pink-100 to-orange-100 rounded-full blur-3xl opacity-50"></div>
+            <!-- Games Menu -->
+            <div id="games-menu" class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 sm:p-12 text-center">
+                <h2 class="text-3xl font-black text-slate-800 mb-3">미니 게임 선택</h2>
+                <p class="text-slate-500 mb-10 font-medium">원하는 게임을 선택해서 즐겁게 복습해 보세요!</p>
                 
-                <div class="relative z-10">
-                    <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[2rem] flex items-center justify-center text-5xl mx-auto mb-8 shadow-xl shadow-indigo-200 transform rotate-12">
-                        <i class="fa-solid fa-meteor"></i>
-                    </div>
-                    <h2 class="text-4xl font-black text-slate-800 mb-4 tracking-tight">단어 방어전 <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">서바이벌</span></h2>
-                    
-                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6 max-w-lg mx-auto mb-10 text-left shadow-inner">
-                        <p class="text-slate-600 mb-4 font-bold text-center">🎮 게임 방법</p>
-                        <ul class="text-sm text-slate-500 space-y-3 font-medium">
-                            <li class="flex items-start gap-2"><i class="fa-solid fa-1 text-indigo-400 mt-0.5"></i> 위에서 떨어지는 <b>한국어 뜻</b>이나 <b>영영풀이</b> 블록을 확인하세요.</li>
-                            <li class="flex items-start gap-2"><i class="fa-solid fa-2 text-indigo-400 mt-0.5"></i> 블록이 바닥에 닿기 전에 알맞은 <b>영어 단어</b> 버튼을 클릭하여 요격하세요.</li>
-                            <li class="flex items-start gap-2"><i class="fa-solid fa-3 text-rose-400 mt-0.5"></i> 기회는 <b class="text-rose-500">단 3번(하트)</b> 뿐이며, 점수가 높아질수록 속도가 빨라집니다!</li>
-                        </ul>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Game 1: Memory -->
+                    <div class="bg-slate-50 rounded-3xl border-2 border-slate-200 p-8 flex flex-col items-center hover:border-purple-300 hover:bg-purple-50 transition-colors group">
+                        <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-4xl mb-6 group-hover:scale-110 transition-transform"><i class="fa-solid fa-puzzle-piece"></i></div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-2">짝맞추기 게임</h3>
+                        <p class="text-slate-500 text-sm mb-6 h-10">영어 단어와 한국어 뜻 카드를 뒤집어 짝을 맞춰보세요.</p>
+                        <button onclick="showGameMenu('memory')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors">플레이 하기</button>
                     </div>
 
-                    <button onclick="startWordDefense()" class="bg-slate-800 hover:bg-black text-white font-black text-xl py-5 px-14 rounded-2xl shadow-xl shadow-slate-300 transition-all active:scale-95 hover:-translate-y-1 flex items-center justify-center gap-3 mx-auto">
-                        <i class="fa-solid fa-play"></i> 게임 스타트!
-                    </button>
+                    <!-- Game 2: Defense -->
+                    <div class="bg-slate-50 rounded-3xl border-2 border-slate-200 p-8 flex flex-col items-center hover:border-rose-300 hover:bg-rose-50 transition-colors group">
+                        <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-4xl mb-6 group-hover:scale-110 transition-transform"><i class="fa-solid fa-meteor"></i></div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-2">단어 방어전</h3>
+                        <p class="text-slate-500 text-sm mb-6 h-10">떨어지는 뜻을 보고 알맞은 단어를 재빨리 클릭해 요격하세요.</p>
+                        <button onclick="showGameMenu('defense')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-colors">플레이 하기</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Game Play Area -->
-            <div id="game-play-area" class="hidden">
-                <!-- Status Bar -->
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex gap-1.5 text-rose-500 text-xl" id="game-lives">
-                        <!-- Hearts -->
-                    </div>
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-2xl px-6 py-2 rounded-xl shadow-md border border-indigo-700 flex items-center gap-3">
-                        <i class="fa-solid fa-star text-yellow-300 text-lg"></i> <span id="defense-score" class="drop-shadow-md">0</span>
-                    </div>
-                </div>
-
-                <!-- Game Canvas -->
-                <div class="relative w-full h-[400px] sm:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-700 via-slate-900 to-black">
-                    
-                    <!-- Stars Background -->
-                    <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 20px 20px;"></div>
-
-                    <!-- Base line to defend -->
-                    <div class="absolute bottom-0 w-full h-3 bg-gradient-to-r from-rose-600 via-pink-500 to-rose-600 shadow-[0_-5px_20px_rgba(244,63,94,0.6)] z-0"></div>
-
-                    <!-- Falling Element Container -->
-                    <div id="falling-container" class="absolute w-full px-4 z-10" style="top: -100px;">
-                        <div id="falling-box" class="bg-white/95 backdrop-blur-md border-4 border-indigo-400 p-5 rounded-2xl shadow-lg shadow-indigo-500/30 max-w-[85%] sm:max-w-md mx-auto text-center transform transition-transform">
-                            <p id="falling-text" class="text-slate-800 font-black text-lg sm:text-2xl break-keep leading-tight drop-shadow-sm"></p>
+            <!-- Memory Game UI -->
+            <div id="game-memory-area" class="hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="backToGamesMenu()" class="text-slate-400 hover:text-slate-800 font-bold bg-slate-100 px-4 py-2 rounded-xl"><i class="fa-solid fa-arrow-left mr-2"></i>메뉴로</button>
+                        <div class="flex gap-4">
+                            <div class="bg-indigo-50 px-4 py-2 rounded-xl text-center"><p class="text-xs text-indigo-500 font-bold">MOVES</p><p id="memory-moves" class="text-xl font-black text-indigo-700">0</p></div>
                         </div>
                     </div>
-                    
-                    <!-- Explosion Effect Container -->
-                    <div id="explosion-effect" class="absolute hidden text-6xl drop-shadow-2xl z-20" style="left: 50%; transform: translateX(-50%);">
-                        💥
-                    </div>
-                </div>
-
-                <!-- Game Controls (Answers) -->
-                <div class="mt-6">
-                    <div id="defense-options" class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <!-- Buttons injected by JS -->
-                    </div>
+                    <!-- Memory Grid -->
+                    <div id="memory-board" class="grid grid-cols-4 gap-2 sm:gap-4 w-full aspect-square sm:aspect-auto sm:h-[500px] mb-6 perspective-1000"></div>
+                    <button onclick="initMemoryGame()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl text-lg">다시 시작</button>
                 </div>
             </div>
 
-            <!-- Game Over Screen -->
-            <div id="game-over-screen" class="hidden bg-slate-900 rounded-3xl shadow-2xl border-2 border-slate-700 p-10 sm:p-16 text-center text-white mt-4 relative overflow-hidden">
-                <!-- Danger Stripes bg -->
-                <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, #f43f5e 20px, #f43f5e 40px);"></div>
-                
-                <div class="relative z-10">
-                    <div class="text-7xl mb-6 drop-shadow-lg">👾</div>
-                    <h2 class="text-4xl sm:text-5xl font-black text-rose-500 mb-2 tracking-tight drop-shadow-md">GAME OVER</h2>
-                    <p class="text-slate-400 mb-8 font-bold text-lg">기지를 방어하는 데 실패했습니다!</p>
-                    
-                    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 inline-block mb-10 shadow-inner">
-                        <p class="text-slate-400 font-bold uppercase tracking-widest text-sm mb-2">Final Score</p>
-                        <div class="text-7xl font-black text-yellow-400 drop-shadow-md" id="final-defense-score">0</div>
-                    </div>
+            <!-- Defense Game UI (Updated logic & UI) -->
+            <div id="game-defense-start" class="hidden bg-white rounded-3xl border border-slate-100 p-10 text-center">
+                 <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[2rem] flex items-center justify-center text-5xl mx-auto mb-8 transform rotate-12"><i class="fa-solid fa-meteor"></i></div>
+                 <h2 class="text-4xl font-black text-slate-800 mb-8">단어 방어전</h2>
+                 <p class="text-slate-600 mb-8 font-bold">천천히 떨어지니 당황하지 말고 정답을 클릭하세요!</p>
+                 <div class="flex justify-center gap-4">
+                    <button onclick="backToGamesMenu()" class="bg-slate-200 text-slate-700 font-bold py-4 px-8 rounded-2xl">뒤로</button>
+                    <button onclick="startDefenseGame()" class="bg-slate-800 text-white font-black py-4 px-12 rounded-2xl">시작!</button>
+                 </div>
+            </div>
 
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onclick="startWordDefense()" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-lg shadow-rose-500/30 flex items-center justify-center gap-2 text-lg active:scale-95">
-                            <i class="fa-solid fa-rotate-right"></i> 다시 도전하기
-                        </button>
-                        <button onclick="quitGame()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-2xl transition-all flex items-center justify-center text-lg active:scale-95">
-                            메인으로 나가기
-                        </button>
+            <div id="game-defense-play" class="hidden">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <div class="bg-white px-4 py-2 rounded-xl flex gap-1 text-rose-500 text-xl" id="def-lives"></div>
+                    <div class="bg-slate-800 text-white font-black text-xl px-6 py-2 rounded-xl flex items-center gap-2">SCORE <span id="def-score" class="text-yellow-400">0</span></div>
+                </div>
+                
+                <div class="relative w-full h-[400px] sm:h-[500px] rounded-3xl overflow-hidden border-4 border-slate-800 bg-slate-900">
+                    <div class="absolute bottom-0 w-full h-3 bg-rose-600 shadow-[0_-5px_20px_rgba(244,63,94,0.6)] z-0"></div>
+                    <div id="def-container" class="absolute w-full px-4 z-10" style="top: -100px;">
+                        <div id="def-box" class="bg-white border-4 border-indigo-400 p-5 rounded-2xl shadow-lg max-w-[85%] sm:max-w-md mx-auto text-center transform transition-transform">
+                            <p id="def-text" class="text-slate-800 font-black text-lg sm:text-2xl break-keep"></p>
+                        </div>
                     </div>
+                    <div id="def-explosion" class="absolute hidden text-6xl z-20" style="left: 50%; transform: translateX(-50%);">💥</div>
+                </div>
+
+                <div class="mt-6">
+                    <div id="def-options" class="grid grid-cols-2 gap-3 sm:gap-4"></div>
+                </div>
+            </div>
+
+            <div id="game-defense-over" class="hidden bg-slate-900 rounded-3xl border-2 border-slate-700 p-10 sm:p-16 text-center text-white mt-4">
+                <div class="text-7xl mb-6">👾</div>
+                <h2 class="text-4xl font-black text-rose-500 mb-2">GAME OVER</h2>
+                <div class="text-7xl font-black text-yellow-400 mb-10" id="def-final-score">0</div>
+                <div class="flex justify-center gap-4">
+                    <button onclick="startDefenseGame()" class="bg-rose-500 text-white font-black py-4 px-8 rounded-2xl">다시 도전</button>
+                    <button onclick="backToGamesMenu()" class="bg-slate-700 text-white font-bold py-4 px-8 rounded-2xl">나가기</button>
                 </div>
             </div>
 
@@ -398,7 +373,6 @@
         
     </main>
 
-    <!-- Raw Data and Scripts -->
     <script>
         const vocabData = [
             { id: 1, eng: "artwork", kor: "미술품", def: "a painting, drawing, or other piece of art", ex: "She created an artwork for the school festival.", blankEx: "She created an _______ for the school festival." },
@@ -429,13 +403,8 @@
             { id: 26, eng: "unique", kor: "독특한", def: "being the only one of its kind; different from everything else", ex: "She has a unique style of painting.", blankEx: "She has a _______ style of painting." }
         ];
 
-        /* ================= TAB NAVIGATION ================= */
         function switchTab(tabId) {
-            // Stop game loop if leaving game tab
-            if(tabId !== 'game' && gameLoopInterval) {
-                quitGame();
-            }
-
+            quitDefenseGame(); // Stop game loop
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(`sec-${tabId}`).classList.remove('hidden');
 
@@ -454,10 +423,10 @@
             });
         }
 
-        /* ================= LEARN TAB LOGIC (3-Step Card) ================= */
+        /* ================= LEARN TAB LOGIC (4-Step) ================= */
         let currentCardIndex = 0;
         let learnOrder = [...vocabData];
-        let cardState = 0; // 0: Front, 1: Back (Kor Only), 2: Back (Kor+Def+Ex)
+        let cardState = 0; // 0:Front, 1:Kor, 2:Kor+Def, 3:Kor+Def+Ex
 
         function shuffleCards() {
             learnOrder = learnOrder.sort(() => Math.random() - 0.5);
@@ -474,58 +443,58 @@
             document.getElementById('card-ex').textContent = `"${word.ex}"`;
             document.getElementById('card-counter').textContent = `${currentCardIndex + 1} / ${learnOrder.length}`;
             
-            // Generate List if not done
             const listEl = document.getElementById('vocab-list');
             if(listEl.children.length === 0) {
                 vocabData.forEach(v => {
                     const li = document.createElement('li');
-                    li.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-purple-200 hover:bg-purple-50 hover:shadow-sm transition-all flex flex-col justify-center';
-                    li.innerHTML = `
-                        <div class="flex items-baseline gap-2 mb-1">
-                            <span class="font-black text-indigo-700 text-lg">${v.eng}</span>
-                            <span class="font-bold text-slate-700 text-sm bg-yellow-200/50 px-2 py-0.5 rounded">${v.kor}</span>
-                        </div>
-                        <div class="text-slate-500 text-xs sm:text-sm font-medium leading-tight">
-                            ${v.def}
-                        </div>
-                    `;
+                    li.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col justify-center';
+                    li.innerHTML = `<div class="flex items-baseline gap-2 mb-1"><span class="font-black text-indigo-700 text-lg">${v.eng}</span><span class="font-bold text-slate-700 text-sm bg-yellow-200/50 px-2 py-0.5 rounded">${v.kor}</span></div>`;
                     listEl.appendChild(li);
                 });
             }
         }
 
-        function handleCardClick() {
+        function handleCardClick(side) {
             const flashcard = document.getElementById('flashcard');
-            const details = document.getElementById('card-details');
+            const defContainer = document.getElementById('card-def-container');
+            const exContainer = document.getElementById('card-ex-container');
             const instruction = document.getElementById('card-instruction');
             const korText = document.getElementById('card-kor');
+            const btnEx = document.getElementById('btn-show-ex');
 
-            if (cardState === 0) {
+            if (side === 'front' && cardState === 0) {
                 // Step 1: Flip to Back (Show Korean Only)
                 flashcard.classList.add('rotate-y-180');
-                
-                // Ensure details are hidden initially
-                details.classList.remove('details-visible');
-                details.classList.add('details-hidden');
-                
-                korText.classList.remove('-translate-y-6', 'scale-90'); // Reset position
-                
-                instruction.innerHTML = '<i class="fa-solid fa-hand-pointer mr-2"></i> 영영풀이 & 예문 보기';
+                korText.classList.remove('-translate-y-4', 'scale-90');
+                instruction.innerHTML = '<i class="fa-solid fa-hand-pointer animate-pulse"></i> <span>클릭해서 영영풀이 보기</span>';
                 cardState = 1;
-            } else if (cardState === 1) {
-                // Step 2: Show Details (Definition & Example)
-                details.classList.remove('details-hidden');
-                details.classList.add('details-visible');
+            } else if (side === 'back' && cardState === 1) {
+                // Step 2: Show Definition Only
+                defContainer.classList.remove('details-hidden');
+                defContainer.classList.add('details-visible');
+                korText.classList.add('-translate-y-4', 'scale-90');
                 
-                // Move Korean text slightly up to make room
-                korText.classList.add('-translate-y-6', 'scale-90');
-                
-                instruction.innerHTML = '<i class="fa-solid fa-rotate-left mr-2"></i> 클릭해서 앞면으로 돌아가기';
+                instruction.innerHTML = ''; // Hide click instruction
+                btnEx.classList.remove('hidden'); // Show Example button
                 cardState = 2;
-            } else {
-                // Step 3: Flip back to Front
+            } else if (side === 'back' && (cardState === 2 || cardState === 3)) {
+                // Return to front if clicked elsewhere on back
                 resetCardStateToFront();
             }
+        }
+
+        function showExample(event) {
+            event.stopPropagation(); // Prevent flipping back
+            const exContainer = document.getElementById('card-ex-container');
+            const btnEx = document.getElementById('btn-show-ex');
+            const instruction = document.getElementById('card-instruction');
+            
+            exContainer.classList.remove('details-hidden');
+            exContainer.classList.add('details-visible');
+            btnEx.classList.add('hidden'); // Hide button after showing
+            
+            instruction.innerHTML = '<i class="fa-solid fa-rotate-left mr-2"></i> 클릭해서 앞면으로 돌아가기';
+            cardState = 3;
         }
 
         function resetCardStateToFront() {
@@ -533,346 +502,236 @@
             flashcard.classList.remove('rotate-y-180');
             cardState = 0;
             
-            // Wait for flip animation to finish before hiding details to prevent visual glitch
             setTimeout(() => {
-                document.getElementById('card-details').classList.remove('details-visible');
-                document.getElementById('card-details').classList.add('details-hidden');
-                document.getElementById('card-kor').classList.remove('-translate-y-6', 'scale-90');
+                document.getElementById('card-def-container').classList.remove('details-visible');
+                document.getElementById('card-def-container').classList.add('details-hidden');
+                document.getElementById('card-ex-container').classList.remove('details-visible');
+                document.getElementById('card-ex-container').classList.add('details-hidden');
+                document.getElementById('card-kor').classList.remove('-translate-y-4', 'scale-90');
+                document.getElementById('btn-show-ex').classList.add('hidden');
             }, 300);
         }
 
-        function nextCard() {
-            resetCardStateToFront();
-            setTimeout(() => {
-                currentCardIndex = (currentCardIndex + 1) % learnOrder.length;
-                renderCard();
-            }, 200);
-        }
+        function nextCard() { resetCardStateToFront(); setTimeout(() => { currentCardIndex = (currentCardIndex + 1) % learnOrder.length; renderCard(); }, 200); }
+        function prevCard() { resetCardStateToFront(); setTimeout(() => { currentCardIndex = (currentCardIndex - 1 + learnOrder.length) % learnOrder.length; renderCard(); }, 200); }
 
-        function prevCard() {
-            resetCardStateToFront();
-            setTimeout(() => {
-                currentCardIndex = (currentCardIndex - 1 + learnOrder.length) % learnOrder.length;
-                renderCard();
-            }, 200);
-        }
-
-
-        /* ================= QUIZ TAB LOGIC ================= */
-        let currentQuizQuestions = [];
-        let currentQuizIndex = 0;
-        let score = 0;
-        let quizMode = '';
+        /* ================= QUIZ LOGIC (Unchanged functionally) ================= */
+        let currentQuizQuestions = [], currentQuizIndex = 0, quizScore = 0, quizMode = '';
         const TOTAL_QUIZ_QUESTIONS = 10;
 
         function startQuiz(mode) {
-            quizMode = mode;
-            score = 0;
-            currentQuizIndex = 0;
-            currentQuizQuestions = generateQuizBatch(TOTAL_QUIZ_QUESTIONS, mode);
+            quizMode = mode; quizScore = 0; currentQuizIndex = 0;
+            currentQuizQuestions = [...vocabData].sort(() => Math.random() - 0.5).slice(0, TOTAL_QUIZ_QUESTIONS).map(targetWord => {
+                let options = [targetWord, ...[...vocabData].filter(w => w.id !== targetWord.id).sort(() => Math.random() - 0.5).slice(0,3)].sort(() => Math.random() - 0.5);
+                return { target: targetWord, options: options };
+            });
             
             document.getElementById('quiz-menu').classList.add('hidden');
             document.getElementById('quiz-result').classList.add('hidden');
             document.getElementById('quiz-ongoing').classList.remove('hidden');
             
-            let typeLabel = "";
-            if(mode === 'eng2kor') typeLabel = "단어 뜻 맞추기 (영 ➔ 한)";
-            if(mode === 'kor2eng') typeLabel = "영어 단어 찾기 (한 ➔ 영)";
-            if(mode === 'def2eng') typeLabel = "영영풀이 매칭";
-            if(mode === 'blank') typeLabel = "빈칸에 알맞은 단어는?";
-            document.getElementById('quiz-type-label').textContent = typeLabel;
-
+            document.getElementById('quiz-type-label').textContent = mode === 'eng2kor' ? "단어 뜻 맞추기" : mode === 'kor2eng' ? "단어 찾기" : mode === 'def2eng' ? "영영풀이 매칭" : "빈칸 채우기";
             renderQuizQuestion();
         }
 
-        function generateQuizBatch(num, mode) {
-            let shuffledVocab = [...vocabData].sort(() => Math.random() - 0.5).slice(0, num);
-            return shuffledVocab.map(targetWord => {
-                let options = [targetWord];
-                let otherWords = [...vocabData].filter(w => w.id !== targetWord.id).sort(() => Math.random() - 0.5);
-                options.push(otherWords[0], otherWords[1], otherWords[2]);
-                options = options.sort(() => Math.random() - 0.5);
-                return { target: targetWord, options: options };
-            });
-        }
-
         function renderQuizQuestion() {
-            const quizData = currentQuizQuestions[currentQuizIndex];
-            const target = quizData.target;
+            const qData = currentQuizQuestions[currentQuizIndex];
             const qEl = document.getElementById('quiz-question');
+            qEl.innerHTML = quizMode === 'eng2kor' ? qData.target.eng : quizMode === 'kor2eng' ? qData.target.kor : quizMode === 'def2eng' ? `"${qData.target.def}"` : qData.target.blankEx.replace('_______', '<span class="text-indigo-400 underline decoration-4 underline-offset-8">_______</span>');
             
-            if(quizMode === 'eng2kor') qEl.textContent = target.eng;
-            if(quizMode === 'kor2eng') qEl.textContent = target.kor;
-            if(quizMode === 'def2eng') qEl.textContent = `"${target.def}"`;
-            if(quizMode === 'blank') qEl.innerHTML = target.blankEx.replace('_______', '<span class="text-indigo-400 underline decoration-4 underline-offset-8">_______</span>');
-
             document.getElementById('quiz-progress').textContent = `${currentQuizIndex + 1} / ${TOTAL_QUIZ_QUESTIONS}`;
-            document.getElementById('quiz-score').textContent = score * 10; // 10 points per Q
+            document.getElementById('quiz-score').textContent = quizScore * 10;
             
-            const optionsEl = document.getElementById('quiz-options');
-            optionsEl.innerHTML = '';
-            document.getElementById('quiz-feedback').classList.add('hidden');
-            document.getElementById('next-quiz-btn').classList.add('hidden');
+            const optsEl = document.getElementById('quiz-options'); optsEl.innerHTML = '';
+            document.getElementById('quiz-feedback').classList.add('hidden'); document.getElementById('next-quiz-btn').classList.add('hidden');
 
-            quizData.options.forEach((opt, idx) => {
+            qData.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                // Use letters for options A, B, C, D
-                const letter = String.fromCharCode(65 + idx); 
-                
-                btn.className = 'quiz-option w-full bg-slate-50 border-2 border-slate-200 hover:border-indigo-400 hover:bg-white text-slate-700 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4';
-                
-                let optText = '';
-                if(quizMode === 'eng2kor') optText = opt.kor;
-                if(quizMode === 'kor2eng' || quizMode === 'def2eng' || quizMode === 'blank') optText = opt.eng;
-                
-                btn.innerHTML = `<span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0">${letter}</span> <span class="text-lg">${optText}</span>`;
-                btn.onclick = () => checkAnswer(opt.id, target.id, btn);
-                optionsEl.appendChild(btn);
+                const optText = quizMode === 'eng2kor' ? opt.kor : opt.eng;
+                btn.className = 'w-full bg-slate-50 border-2 border-slate-200 hover:border-indigo-400 text-slate-700 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4 quiz-btn';
+                btn.innerHTML = `<span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0">${String.fromCharCode(65 + idx)}</span> <span class="text-lg">${optText}</span>`;
+                btn.onclick = () => checkQuiz(opt.id, qData.target.id, btn);
+                optsEl.appendChild(btn);
             });
         }
 
-        function checkAnswer(selectedId, targetId, btnEl) {
-            document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+        function checkQuiz(selId, tgtId, btnEl) {
+            document.querySelectorAll('.quiz-btn').forEach(b => b.disabled = true);
+            const fbEl = document.getElementById('quiz-feedback');
             
-            const isCorrect = selectedId === targetId;
-            const feedbackEl = document.getElementById('quiz-feedback');
-            
-            if (isCorrect) {
-                score++;
-                btnEl.className = 'w-full bg-emerald-50 border-2 border-emerald-500 text-emerald-800 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4 shadow-md';
-                btnEl.querySelector('span:first-child').className = 'bg-emerald-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0';
-                
-                feedbackEl.innerHTML = "<i class='fa-solid fa-face-laugh-beam mr-2 text-2xl'></i> <span class='align-middle'>완벽해요! 정답입니다.</span>";
-                feedbackEl.className = "block p-5 rounded-2xl text-center font-black text-xl mb-6 bg-emerald-100 text-emerald-700 border-emerald-200 shadow-sm pop-animation";
-                // Reset animation
-                feedbackEl.style.animation = 'none';
-                feedbackEl.offsetHeight; /* trigger reflow */
-                feedbackEl.style.animation = null;
-                
+            if (selId === tgtId) {
+                quizScore++;
+                btnEl.className = 'w-full bg-emerald-50 border-2 border-emerald-500 text-emerald-800 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4';
+                btnEl.querySelector('span').className = 'bg-emerald-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0';
+                fbEl.innerHTML = "<i class='fa-solid fa-face-laugh-beam mr-2'></i>정답입니다!";
+                fbEl.className = "block p-5 rounded-2xl text-center font-black text-xl mb-6 bg-emerald-100 text-emerald-700 pop-animation";
             } else {
                 btnEl.className = 'w-full bg-rose-50 border-2 border-rose-500 text-rose-800 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4 shake-animation';
-                btnEl.querySelector('span:first-child').className = 'bg-rose-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0';
-                
-                feedbackEl.innerHTML = "<i class='fa-solid fa-face-frown mr-2 text-2xl'></i> <span class='align-middle'>아쉽네요. 다시 한번 기억해보세요.</span>";
-                feedbackEl.className = "block p-5 rounded-2xl text-center font-black text-xl mb-6 bg-rose-100 text-rose-700 border-rose-200 shadow-sm";
-                
-                // Highlight correct answer
-                document.querySelectorAll('.quiz-option').forEach(b => {
-                    const quizData = currentQuizQuestions[currentQuizIndex];
-                    let optText = '';
-                    if(quizMode === 'eng2kor') optText = quizData.target.kor;
-                    if(['kor2eng', 'def2eng', 'blank'].includes(quizMode)) optText = quizData.target.eng;
-                    
-                    if (b.innerText.includes(optText)) {
-                        b.className = 'w-full bg-emerald-50/50 border-2 border-emerald-400 border-dashed text-emerald-700 font-bold py-4 px-6 rounded-2xl text-left flex items-center gap-4';
-                        b.querySelector('span:first-child').className = 'bg-emerald-400 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0';
-                    }
-                });
+                btnEl.querySelector('span').className = 'bg-rose-500 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black shrink-0';
+                fbEl.innerHTML = "<i class='fa-solid fa-face-frown mr-2'></i>틀렸습니다.";
+                fbEl.className = "block p-5 rounded-2xl text-center font-black text-xl mb-6 bg-rose-100 text-rose-700";
             }
-            
-            document.getElementById('quiz-score').textContent = score * 10;
+            document.getElementById('quiz-score').textContent = quizScore * 10;
             document.getElementById('next-quiz-btn').classList.remove('hidden');
         }
 
         function nextQuizQuestion() {
             currentQuizIndex++;
-            if (currentQuizIndex < TOTAL_QUIZ_QUESTIONS) {
-                renderQuizQuestion();
+            if (currentQuizIndex < TOTAL_QUIZ_QUESTIONS) renderQuizQuestion();
+            else {
+                document.getElementById('quiz-ongoing').classList.add('hidden');
+                document.getElementById('quiz-result').classList.remove('hidden');
+                document.getElementById('final-score').textContent = quizScore;
+            }
+        }
+        function backToQuizMenu() { document.getElementById('quiz-ongoing').classList.add('hidden'); document.getElementById('quiz-result').classList.add('hidden'); document.getElementById('quiz-menu').classList.remove('hidden'); }
+
+
+        /* ================= GAME MENU LOGIC ================= */
+        function showGameMenu(type) {
+            document.getElementById('games-menu').classList.add('hidden');
+            if(type === 'memory') {
+                document.getElementById('game-memory-area').classList.remove('hidden');
+                initMemoryGame();
             } else {
-                showQuizResult();
+                document.getElementById('game-defense-start').classList.remove('hidden');
             }
         }
 
-        function showQuizResult() {
-            document.getElementById('quiz-ongoing').classList.add('hidden');
-            document.getElementById('quiz-result').classList.remove('hidden');
-            document.getElementById('final-score').textContent = score;
-            
-            const iconEl = document.getElementById('result-icon');
-            if(score >= 9) {
-                iconEl.innerHTML = '<i class="fa-solid fa-crown text-yellow-500"></i>';
-                iconEl.className = "w-32 h-32 mx-auto rounded-[2.5rem] flex items-center justify-center text-7xl mb-8 bg-yellow-100 shadow-inner transform rotate-6";
-            } else if (score >= 6) {
-                iconEl.innerHTML = '<i class="fa-regular fa-thumbs-up text-blue-500"></i>';
-                iconEl.className = "w-32 h-32 mx-auto rounded-[2.5rem] flex items-center justify-center text-7xl mb-8 bg-blue-100 shadow-inner transform -rotate-6";
-            } else {
-                iconEl.innerHTML = '<i class="fa-solid fa-dumbbell text-slate-500"></i>';
-                iconEl.className = "w-32 h-32 mx-auto rounded-[2.5rem] flex items-center justify-center text-7xl mb-8 bg-slate-100 shadow-inner";
-            }
+        function backToGamesMenu() {
+            quitDefenseGame(); // Ensure defense loop is stopped
+            document.getElementById('game-memory-area').classList.add('hidden');
+            document.getElementById('game-defense-start').classList.add('hidden');
+            document.getElementById('game-defense-play').classList.add('hidden');
+            document.getElementById('game-defense-over').classList.add('hidden');
+            document.getElementById('games-menu').classList.remove('hidden');
         }
 
-        function backToQuizMenu() {
-            document.getElementById('quiz-ongoing').classList.add('hidden');
-            document.getElementById('quiz-result').classList.add('hidden');
-            document.getElementById('quiz-menu').classList.remove('hidden');
-        }
-
-        /* ================= GAME TAB LOGIC (Word Defense Survival) ================= */
-        let gameLoopInterval = null;
-        let defScore = 0;
-        let defLives = 3;
-        let fallingY = -100;
-        let currentFallSpeed = 1.0;
-        let currentDefTarget = null;
-        let isAnimatingExplosion = false;
+        /* ================= MEMORY GAME LOGIC ================= */
+        let hasFlipped = false, lockBoard = false, firstCard, secondCard, matchedPairs = 0, memMoves = 0;
         
-        // Element caching
-        const elContainer = document.getElementById('falling-container');
-        const elText = document.getElementById('falling-text');
-        const elBox = document.getElementById('falling-box');
-        const elOptions = document.getElementById('defense-options');
-        const elScore = document.getElementById('defense-score');
-        const elLives = document.getElementById('game-lives');
-        const elExplosion = document.getElementById('explosion-effect');
-
-        function startWordDefense() {
-            document.getElementById('game-start-menu').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.add('hidden');
-            document.getElementById('game-play-area').classList.remove('hidden');
-
-            defScore = 0;
-            defLives = 3;
-            currentFallSpeed = 0.8; // Initial slow speed
-            updateGameUI();
+        function initMemoryGame() {
+            const board = document.getElementById('memory-board');
+            board.innerHTML = '';
+            hasFlipped = lockBoard = false; firstCard = secondCard = null; matchedPairs = memMoves = 0;
+            document.getElementById('memory-moves').textContent = memMoves;
             
-            spawnDefenseWord();
+            let selected = [...vocabData].sort(() => Math.random() - 0.5).slice(0, 8);
+            let cards = [];
+            selected.forEach(w => { cards.push({ id: w.id, text: w.eng, type: 'eng' }); cards.push({ id: w.id, text: w.kor, type: 'kor' }); });
+            cards.sort(() => Math.random() - 0.5);
             
-            if(gameLoopInterval) clearInterval(gameLoopInterval);
-            gameLoopInterval = setInterval(gameTick, 20); // 50fps
-        }
-
-        function updateGameUI() {
-            elScore.textContent = defScore;
-            elLives.innerHTML = '';
-            for(let i=0; i<3; i++) {
-                if(i < defLives) {
-                    elLives.innerHTML += '<i class="fa-solid fa-heart drop-shadow-md pop-animation"></i>';
-                } else {
-                    elLives.innerHTML += '<i class="fa-solid fa-heart-crack text-slate-300"></i>';
-                }
-            }
-        }
-
-        function spawnDefenseWord() {
-            if(defLives <= 0) return;
-            
-            isAnimatingExplosion = false;
-            
-            // Pick a random word
-            currentDefTarget = vocabData[Math.floor(Math.random() * vocabData.length)];
-            
-            // Reset position
-            fallingY = -50;
-            elContainer.style.top = fallingY + 'px';
-            elContainer.classList.remove('hidden');
-            
-            const isKor = Math.random() > 0.4;
-            elText.textContent = isKor ? currentDefTarget.kor : currentDefTarget.def;
-            elText.className = isKor ? "text-slate-800 font-black text-xl sm:text-2xl break-keep leading-tight drop-shadow-sm" : "text-slate-700 font-bold text-sm sm:text-lg italic break-words leading-tight";
-            
-            // Speed logic
-            currentFallSpeed = 0.8 + (defScore * 0.03); // Slightly slower progression for better playability
-
-            // Options
-            let options = [currentDefTarget];
-            let otherWords = [...vocabData].filter(w => w.id !== currentDefTarget.id).sort(() => Math.random() - 0.5);
-            options.push(otherWords[0], otherWords[1], otherWords[2]);
-            options = options.sort(() => Math.random() - 0.5);
-
-            elOptions.innerHTML = '';
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full bg-slate-800/90 backdrop-blur-sm hover:bg-indigo-600 border-2 border-slate-600 hover:border-indigo-400 text-white font-black py-4 px-2 rounded-2xl transition-all text-sm sm:text-xl shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1';
-                btn.textContent = opt.eng;
-                btn.onclick = () => handleDefenseClick(opt.id, btn);
-                elOptions.appendChild(btn);
+            cards.forEach(card => {
+                const el = document.createElement('div');
+                el.className = 'memory-card'; el.dataset.id = card.id;
+                el.innerHTML = `<div class="memory-card-inner"><div class="memory-card-front"><i class="fa-solid fa-question opacity-50"></i></div><div class="memory-card-back text-sm sm:text-base">${card.text}</div></div>`;
+                el.addEventListener('click', flipMemCard);
+                board.appendChild(el);
             });
         }
 
-        function gameTick() {
-            if(isAnimatingExplosion) return;
-
-            fallingY += currentFallSpeed;
-            elContainer.style.top = fallingY + 'px';
-
-            const containerHeight = document.getElementById('game-play-area').querySelector('.relative').clientHeight;
-            if (fallingY > containerHeight - 80) { // adjusted hit box
-                handleHitGround();
-            }
+        function flipMemCard() {
+            if (lockBoard || this === firstCard) return;
+            this.classList.add('flipped');
+            if (!hasFlipped) { hasFlipped = true; firstCard = this; return; }
+            secondCard = this; memMoves++; document.getElementById('memory-moves').textContent = memMoves;
+            firstCard.dataset.id === secondCard.dataset.id ? disableMemCards() : unflipMemCards();
         }
 
-        function handleHitGround() {
-            // Flash screen red
-            const playArea = document.getElementById('game-play-area').querySelector('.relative');
-            playArea.classList.add('border-rose-500', 'shadow-[inset_0_0_50px_rgba(244,63,94,0.8)]');
-            setTimeout(() => playArea.classList.remove('border-rose-500', 'shadow-[inset_0_0_50px_rgba(244,63,94,0.8)]'), 200);
+        function disableMemCards() {
+            firstCard.removeEventListener('click', flipMemCard); secondCard.removeEventListener('click', flipMemCard);
+            firstCard.classList.add('matched'); secondCard.classList.add('matched');
+            matchedPairs++;
+            if(matchedPairs === 8) setTimeout(() => alert(`완료! 시도 횟수: ${memMoves}`), 500);
+            hasFlipped = lockBoard = false; firstCard = secondCard = null;
+        }
 
-            defLives--;
-            updateGameUI();
+        function unflipMemCards() {
+            lockBoard = true;
+            setTimeout(() => { firstCard.classList.remove('flipped'); secondCard.classList.remove('flipped'); hasFlipped = lockBoard = false; firstCard = secondCard = null; }, 1000);
+        }
+
+        /* ================= DEFENSE GAME LOGIC (Slower speed) ================= */
+        let defLoop = null, defScore = 0, defLives = 3, fallingY = -100, defSpeed = 0.5, currentDefTgt = null, isDefAnim = false;
+        const cDef = document.getElementById('def-container'), tDef = document.getElementById('def-text'), oDef = document.getElementById('def-options');
+
+        function startDefenseGame() {
+            document.getElementById('game-defense-start').classList.add('hidden');
+            document.getElementById('game-defense-over').classList.add('hidden');
+            document.getElementById('game-defense-play').classList.remove('hidden');
+            defScore = 0; defLives = 3; defSpeed = 0.5; // Starts SLOWER
+            updateDefUI(); spawnDefWord();
+            if(defLoop) clearInterval(defLoop);
+            defLoop = setInterval(defTick, 20);
+        }
+
+        function updateDefUI() {
+            document.getElementById('def-score').textContent = defScore;
+            const livesEl = document.getElementById('def-lives'); livesEl.innerHTML = '';
+            for(let i=0; i<3; i++) livesEl.innerHTML += i < defLives ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-solid fa-heart-crack text-slate-400"></i>';
+        }
+
+        function spawnDefWord() {
+            if(defLives <= 0) return;
+            isDefAnim = false; currentDefTgt = vocabData[Math.floor(Math.random() * vocabData.length)];
+            fallingY = -50; cDef.style.top = fallingY + 'px'; cDef.classList.remove('hidden');
             
-            if (defLives <= 0) {
-                gameOver();
-            } else {
-                spawnDefenseWord();
-            }
-        }
-
-        function handleDefenseClick(selectedId, btnEl) {
-            if (isAnimatingExplosion) return;
-
-            if (selectedId === currentDefTarget.id) {
-                isAnimatingExplosion = true;
-                defScore += 10;
-                updateGameUI();
-                
-                // Correct Style
-                btnEl.className = 'w-full bg-emerald-500 border-2 border-emerald-400 text-white font-black py-4 px-2 rounded-2xl transition-all text-sm sm:text-xl shadow-lg shadow-emerald-500/50 scale-105 z-10 relative';
-                
-                elContainer.classList.add('hidden');
-                
-                elExplosion.style.top = fallingY + 'px';
-                elExplosion.classList.remove('hidden');
-                elExplosion.classList.remove('pop-animation');
-                void elExplosion.offsetWidth;
-                elExplosion.classList.add('pop-animation');
-                
-                setTimeout(() => {
-                    elExplosion.classList.add('hidden');
-                    spawnDefenseWord();
-                }, 400);
-
-            } else {
-                // Wrong Style
-                btnEl.className = 'w-full bg-rose-600 border-2 border-rose-500 text-white font-black py-4 px-2 rounded-2xl transition-all text-sm sm:text-xl shadow-lg shake-animation';
-                
-                setTimeout(() => {
-                    btnEl.className = 'w-full bg-slate-800/90 backdrop-blur-sm hover:bg-indigo-600 border-2 border-slate-600 hover:border-indigo-400 text-white font-black py-4 px-2 rounded-2xl transition-all text-sm sm:text-xl shadow-lg hover:shadow-indigo-500/50 hover:-translate-y-1';
-                }, 400);
-            }
-        }
-
-        function gameOver() {
-            clearInterval(gameLoopInterval);
-            gameLoopInterval = null;
+            const isKor = Math.random() > 0.4;
+            tDef.textContent = isKor ? currentDefTgt.kor : currentDefTgt.def;
+            tDef.className = isKor ? "text-slate-800 font-black text-xl break-keep" : "text-slate-700 font-bold text-sm sm:text-base italic break-words";
             
-            document.getElementById('game-play-area').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.remove('hidden');
-            document.getElementById('final-defense-score').textContent = defScore;
+            // Slower progression
+            defSpeed = 0.5 + (defScore * 0.015); 
+
+            let opts = [currentDefTgt, ...[...vocabData].filter(w => w.id !== currentDefTgt.id).sort(() => Math.random()-0.5).slice(0,3)].sort(() => Math.random()-0.5);
+            oDef.innerHTML = '';
+            opts.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'w-full bg-slate-800 border-2 border-slate-600 text-white font-bold py-4 rounded-xl text-sm sm:text-lg hover:bg-indigo-600 transition-colors';
+                b.textContent = opt.eng; b.onclick = () => checkDefClick(opt.id, b);
+                oDef.appendChild(b);
+            });
         }
 
-        function quitGame() {
-            if(gameLoopInterval) clearInterval(gameLoopInterval);
-            gameLoopInterval = null;
-            document.getElementById('game-play-area').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.add('hidden');
-            document.getElementById('game-start-menu').classList.remove('hidden');
+        function defTick() {
+            if(isDefAnim) return;
+            fallingY += defSpeed; cDef.style.top = fallingY + 'px';
+            if (fallingY > 320) { // Hit bottom
+                defLives--; updateDefUI();
+                const pa = document.getElementById('game-defense-play').querySelector('.relative');
+                pa.classList.add('border-rose-500'); setTimeout(() => pa.classList.remove('border-rose-500'), 200);
+                if (defLives <= 0) overDefGame(); else spawnDefWord();
+            }
         }
 
-        // Init App
-        window.onload = () => {
-            renderCard();
-        };
+        function checkDefClick(sId, btn) {
+            if (isDefAnim) return;
+            if (sId === currentDefTgt.id) {
+                isDefAnim = true; defScore += 10; updateDefUI();
+                btn.className = 'w-full bg-emerald-500 border-2 border-emerald-400 text-white font-black py-4 rounded-xl';
+                cDef.classList.add('hidden');
+                
+                const exp = document.getElementById('def-explosion');
+                exp.style.top = fallingY + 'px'; exp.classList.remove('hidden');
+                setTimeout(() => { exp.classList.add('hidden'); spawnDefWord(); }, 400);
+            } else {
+                btn.className = 'w-full bg-rose-600 border-2 border-rose-500 text-white font-bold py-4 rounded-xl shake-animation';
+                setTimeout(() => btn.className = 'w-full bg-slate-800 border-2 border-slate-600 text-white font-bold py-4 rounded-xl', 400);
+            }
+        }
 
+        function overDefGame() {
+            clearInterval(defLoop); defLoop = null;
+            document.getElementById('game-defense-play').classList.add('hidden');
+            document.getElementById('game-defense-over').classList.remove('hidden');
+            document.getElementById('def-final-score').textContent = defScore;
+        }
+
+        function quitDefenseGame() {
+            if(defLoop) clearInterval(defLoop); defLoop = null;
+        }
+
+        window.onload = () => { renderCard(); };
     </script>
 </body>
 </html>
