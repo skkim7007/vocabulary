@@ -32,7 +32,7 @@
         
         /* Details Fade In */
         .details-hidden { opacity: 0; transform: translateY(15px); pointer-events: none; height: 0; overflow: hidden; margin-top: 0; }
-        .details-visible { opacity: 1; transform: translateY(0); pointer-events: auto; height: auto; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 1rem; }
+        .details-visible { opacity: 1; transform: translateY(0); pointer-events: auto; height: auto; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 1.5rem; }
 
         /* Animations */
         @keyframes shake {
@@ -80,10 +80,9 @@
 </head>
 <body class="bg-indigo-50/50 dark:bg-slate-900 h-screen w-screen flex flex-col text-slate-700 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- Header (Gamification & Dark Mode) -->
+    <!-- Header -->
     <header class="flex-shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm border-b border-indigo-50 dark:border-slate-700 transition-colors duration-300">
         <div class="max-w-5xl mx-auto px-4 py-2 flex justify-between items-center">
-            <!-- Logo -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-pink-300 to-purple-400 dark:from-pink-600 dark:to-purple-700 rounded-xl flex items-center justify-center text-white shadow-sm transform -rotate-6">
                     <i class="fa-solid fa-palette text-xl"></i>
@@ -94,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Gamification Status & Dark Mode -->
             <div class="flex items-center gap-3">
                 <div class="flex flex-col items-end">
                     <span class="text-[10px] font-black text-slate-600 dark:text-slate-300" id="user-level">Lv.1 초보자</span>
@@ -125,7 +123,6 @@
             <button onclick="switchTab('game')" id="tab-game" class="nav-btn flex-1 min-w-[70px] py-2 px-1 rounded-lg font-bold text-[11px] sm:text-sm transition-all duration-300 whitespace-nowrap">
                 <i class="fa-solid fa-gamepad sm:mr-1 block sm:inline mb-1 sm:mb-0"></i>게임
             </button>
-            <!-- New: Review Tab -->
             <button onclick="switchTab('review')" id="tab-review" class="nav-btn flex-1 min-w-[70px] py-2 px-1 rounded-lg font-bold text-[11px] sm:text-sm transition-all duration-300 whitespace-nowrap relative">
                 <i class="fa-solid fa-book-medical sm:mr-1 block sm:inline mb-1 sm:mb-0"></i>오답노트
                 <span id="review-badge" class="absolute top-1 right-1 sm:top-2 sm:right-2 w-2 h-2 bg-rose-500 rounded-full hidden"></span>
@@ -151,31 +148,37 @@
                 
                 <div id="flashcard" class="relative w-full flex-1 transform-style-3d transition-transform-700 cursor-pointer min-h-0">
                     <!-- Front -->
-                    <div onclick="handleCardClick('front')" class="absolute w-full h-full backface-hidden card-front border-2 border-slate-100 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300">
+                    <div onclick="handleCardClick('front')" class="absolute w-full h-full backface-hidden card-front border-2 border-slate-100 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300 relative">
                         <!-- TTS Button -->
-                        <button onclick="playTTS(event, 'eng')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-indigo-50 dark:bg-slate-700 text-indigo-500 dark:text-indigo-400 flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
+                        <button onclick="playTTS(event, 'eng')" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-indigo-50 dark:bg-slate-700 text-indigo-500 dark:text-indigo-400 flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                         
-                        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 text-purple-500 dark:text-purple-400 rounded-full flex items-center justify-center text-2xl mb-4 float-animation">
+                        <!-- Center Content -->
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900/50 text-purple-500 dark:text-purple-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
                             <i class="fa-solid fa-language"></i>
                         </div>
-                        <h2 id="card-eng" class="text-4xl sm:text-6xl font-black text-slate-800 dark:text-white mb-6 tracking-tight break-words px-2"></h2>
-                        <div class="bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-full text-slate-500 dark:text-slate-300 font-bold text-xs flex items-center gap-2 mt-auto">
+                        <h2 id="card-eng" class="text-5xl sm:text-6xl font-black text-slate-800 dark:text-white tracking-tight break-words px-2 m-0"></h2>
+                        
+                        <!-- Instruction (Absolute at bottom) -->
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-full text-slate-500 dark:text-slate-300 font-bold text-xs flex items-center gap-2">
                             <i class="fa-solid fa-hand-pointer text-purple-400 animate-pulse"></i> 뜻 확인하기
                         </div>
                     </div>
                     
                     <!-- Back -->
-                    <div onclick="handleCardClick('back')" class="absolute w-full h-full backface-hidden card-back text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden">
-                        <h3 id="card-kor" class="text-5xl sm:text-6xl font-black text-white drop-shadow-md z-10 transition-all duration-500 mb-0 leading-tight"></h3>
+                    <div onclick="handleCardClick('back')" class="absolute w-full h-full backface-hidden card-back text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden relative">
+                        <!-- Center Content -->
+                        <h3 id="card-kor" class="text-6xl sm:text-7xl font-black text-white drop-shadow-md z-10 transition-all duration-500 mb-0 leading-tight"></h3>
                         <div id="card-def-container" class="details-hidden w-full z-10 flex flex-col gap-2">
-                            <div class="w-full bg-black/20 rounded-2xl p-4 backdrop-blur-md border border-white/10 text-left shadow-inner">
+                            <div class="w-full bg-black/20 rounded-2xl p-4 sm:p-6 backdrop-blur-md border border-white/10 text-left shadow-inner">
                                 <p class="text-xs text-purple-200 uppercase tracking-widest mb-2 font-bold flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 영영 풀이</p>
-                                <p id="card-def" class="text-sm sm:text-lg font-bold leading-snug text-white drop-shadow-sm"></p>
+                                <p id="card-def" class="text-base sm:text-lg font-bold leading-snug text-white drop-shadow-sm"></p>
                             </div>
                         </div>
-                        <div id="card-instruction" class="mt-auto z-10 text-white/80 text-xs font-bold flex items-center gap-2">
+                        
+                        <!-- Instruction (Absolute at bottom) -->
+                        <div id="card-instruction" class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap z-10 text-white/80 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-hand-pointer animate-pulse"></i> <span>클릭해서 영영풀이 보기</span>
                         </div>
                     </div>
@@ -207,39 +210,42 @@
                 
                 <div id="ex-flashcard" class="relative w-full flex-1 transform-style-3d transition-transform-700 cursor-pointer min-h-0">
                     <!-- Front -->
-                    <div onclick="handleExCardClick('front')" class="absolute w-full h-full backface-hidden card-front border-2 border-slate-100 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300">
-                        <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 rounded-full flex items-center justify-center text-2xl mb-4 float-animation">
+                    <div onclick="handleExCardClick('front')" class="absolute w-full h-full backface-hidden card-front border-2 border-slate-100 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300 relative">
+                        <!-- Center Content -->
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-pink-100 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
                             <i class="fa-solid fa-pen-nib"></i>
                         </div>
-                        <h2 id="ex-card-eng" class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white mb-2 tracking-tight"></h2>
-                        <h3 id="ex-card-kor" class="text-lg font-bold text-slate-500 dark:text-slate-400 mb-6 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-xl"></h3>
-                        <div class="bg-pink-50 dark:bg-pink-900/30 px-4 py-2 rounded-full text-pink-600 dark:text-pink-400 font-bold text-xs flex items-center gap-2 mt-auto">
+                        <h2 id="ex-card-eng" class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white mb-2 tracking-tight m-0"></h2>
+                        <h3 id="ex-card-kor" class="text-lg sm:text-xl font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-xl"></h3>
+                        
+                        <!-- Instruction (Absolute) -->
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-pink-50 dark:bg-pink-900/30 px-4 py-2 rounded-full text-pink-600 dark:text-pink-400 font-bold text-xs flex items-center gap-2 shadow-sm border border-pink-100 dark:border-pink-800">
                             <i class="fa-solid fa-hand-pointer animate-pulse"></i> 문장 빈칸 채우기
                         </div>
                     </div>
                     
                     <!-- Back -->
-                    <div onclick="handleExCardClick('back')" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-pink-400 to-rose-400 dark:from-pink-600 dark:to-rose-800 text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden">
+                    <div onclick="handleExCardClick('back')" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-pink-400 to-rose-400 dark:from-pink-600 dark:to-rose-800 text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden relative">
                         <!-- TTS Button -->
-                        <button onclick="playTTS(event, 'ex')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
+                        <button onclick="playTTS(event, 'ex')" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm z-20">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
 
-                        <div class="w-full h-full flex flex-col items-center justify-center mt-4">
-                            <i class="fa-solid fa-quote-left text-3xl text-white/30 mb-4 flex-shrink-0"></i>
-                            <p id="ex-card-blank" class="text-xl sm:text-2xl font-bold leading-relaxed text-white drop-shadow-md w-full transition-opacity duration-300 break-keep"></p>
-                            
-                            <div id="ex-card-full-container" class="hidden flex flex-col items-center w-full">
-                                <p id="ex-card-full" class="text-xl sm:text-2xl font-bold leading-relaxed text-white drop-shadow-md w-full break-keep mb-4"></p>
-                                <div class="bg-black/20 px-4 py-3 rounded-2xl border border-white/10 w-full shadow-inner">
-                                    <p class="text-[10px] text-pink-200 font-bold uppercase tracking-widest mb-1">해석</p>
-                                    <p id="ex-card-kor-ex" class="text-sm sm:text-base text-white font-medium break-keep"></p>
-                                </div>
+                        <!-- Center Content -->
+                        <i class="fa-solid fa-quote-left text-3xl sm:text-4xl text-white/30 mb-4"></i>
+                        <p id="ex-card-blank" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full transition-opacity duration-300 break-keep"></p>
+                        
+                        <div id="ex-card-full-container" class="hidden flex flex-col items-center w-full">
+                            <p id="ex-card-full" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full break-keep mb-4 sm:mb-6"></p>
+                            <div class="bg-black/20 px-4 py-3 rounded-2xl border border-white/10 w-full shadow-inner">
+                                <p class="text-[10px] sm:text-xs text-pink-200 font-bold uppercase tracking-widest mb-1">해석</p>
+                                <p id="ex-card-kor-ex" class="text-sm sm:text-lg text-white font-medium break-keep"></p>
                             </div>
-                            
-                            <div id="ex-instruction" class="mt-auto text-white/80 text-xs font-bold flex items-center gap-2 pt-2">
-                                <i class="fa-solid fa-hand-pointer animate-pulse"></i> <span>정답 확인하기</span>
-                            </div>
+                        </div>
+                        
+                        <!-- Instruction (Absolute) -->
+                        <div id="ex-instruction" class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-white/80 text-xs sm:text-sm font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-hand-pointer animate-pulse"></i> <span>정답 확인하기</span>
                         </div>
                     </div>
                 </div>
@@ -277,7 +283,6 @@
                         <div class="bg-purple-100 dark:bg-purple-900/50 w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-book-atlas text-lg text-purple-500"></i></div>
                         <span class="font-black text-sm">영영풀이</span><span class="text-[10px] font-bold text-purple-400">의미 매칭</span>
                     </button>
-                    <!-- NEW: Subjective Spelling Mode -->
                     <button onclick="startQuiz('spelling')" class="bg-white dark:bg-slate-800 border-2 border-rose-100 dark:border-slate-700 active:border-rose-400 text-rose-800 dark:text-rose-300 py-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm">
                         <div class="bg-rose-100 dark:bg-rose-900/50 w-10 h-10 rounded-full flex items-center justify-center"><i class="fa-solid fa-keyboard text-lg text-rose-500"></i></div>
                         <span class="font-black text-sm">스펠링 입력</span><span class="text-[10px] font-bold text-rose-400">주관식 타자</span>
@@ -304,7 +309,7 @@
                         <h3 id="quiz-question" class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white word-break-keep"></h3>
                     </div>
                     
-                    <!-- Options container (Buttons or Input) -->
+                    <!-- Options container -->
                     <div id="quiz-options" class="flex flex-col gap-2 w-full mt-auto"></div>
                 </div>
             </div>
@@ -398,9 +403,8 @@
             </div>
         </section>
 
-        <!-- NEW SECTION: REVIEW (오답 노트) -->
+        <!-- SECTION: REVIEW (오답 노트) -->
         <section id="sec-review" class="hidden w-full h-full max-w-lg mx-auto flex flex-col justify-center text-center">
-            
             <div id="review-empty" class="hidden flex-col items-center justify-center h-full">
                 <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-500 rounded-full flex items-center justify-center text-4xl mb-4">
                     <i class="fa-solid fa-check-double"></i>
@@ -422,20 +426,27 @@
                 
                 <div id="rev-flashcard" class="relative w-full flex-1 transform-style-3d transition-transform-700 cursor-pointer min-h-0">
                     <!-- Front -->
-                    <div onclick="handleRevCardClick('front')" class="absolute w-full h-full backface-hidden bg-rose-50/50 dark:bg-slate-800 border-2 border-rose-200 dark:border-rose-900/50 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300">
-                        <button onclick="playTTS(event, 'rev')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-rose-100 dark:bg-slate-700 text-rose-500 flex items-center justify-center hover:scale-110 transition-transform">
+                    <div onclick="handleRevCardClick('front')" class="absolute w-full h-full backface-hidden bg-rose-50/50 dark:bg-slate-800 border-2 border-rose-200 dark:border-rose-900/50 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300 relative">
+                        <button onclick="playTTS(event, 'rev')" class="absolute top-5 right-5 w-10 h-10 rounded-full bg-rose-100 dark:bg-slate-700 text-rose-500 flex items-center justify-center hover:scale-110 transition-transform z-20">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
-                        <h2 id="rev-card-eng" class="text-4xl sm:text-6xl font-black text-rose-600 dark:text-rose-400 mb-6 tracking-tight break-words px-2"></h2>
-                        <div class="bg-rose-100 dark:bg-slate-700 px-4 py-2 rounded-full text-rose-500 font-bold text-xs flex items-center gap-2 mt-auto">
+                        
+                        <div class="flex-1 flex flex-col items-center justify-center w-full">
+                            <h2 id="rev-card-eng" class="text-5xl sm:text-6xl font-black text-rose-600 dark:text-rose-400 tracking-tight break-words px-2 m-0"></h2>
+                        </div>
+                        
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-rose-100 dark:bg-slate-700 px-4 py-2 rounded-full text-rose-500 font-bold text-xs flex items-center gap-2 mt-auto">
                             <i class="fa-solid fa-hand-pointer animate-pulse"></i> 뜻 확인하기
                         </div>
                     </div>
                     
                     <!-- Back -->
-                    <div onclick="handleRevCardClick('back')" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-rose-400 to-pink-500 dark:from-rose-700 dark:to-pink-900 text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden">
-                        <h3 id="rev-card-kor" class="text-4xl sm:text-5xl font-black text-white drop-shadow-md z-10 transition-all duration-500 mb-4 leading-tight"></h3>
-                        <p id="rev-card-def" class="text-sm sm:text-lg font-bold leading-snug text-white/90 drop-shadow-sm px-4 bg-black/20 py-3 rounded-xl border border-white/10"></p>
+                    <div onclick="handleRevCardClick('back')" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-rose-400 to-pink-500 dark:from-rose-700 dark:to-pink-900 text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden relative">
+                        
+                        <div class="flex-1 flex flex-col items-center justify-center w-full">
+                            <h3 id="rev-card-kor" class="text-4xl sm:text-6xl font-black text-white drop-shadow-md transition-all duration-500 mb-4 leading-tight"></h3>
+                            <p id="rev-card-def" class="text-base sm:text-lg font-bold leading-snug text-white/90 drop-shadow-sm px-5 bg-black/20 py-4 rounded-2xl border border-white/10"></p>
+                        </div>
                     </div>
                 </div>
 
@@ -544,10 +555,10 @@
             if(type === 'rev') text = revOrder[currentRevIndex].eng;
 
             if('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // stop current
+                window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.9; // Slightly slower for learning
+                utterance.rate = 0.9; 
                 window.speechSynthesis.speak(utterance);
             } else {
                 alert("브라우저가 음성 지원을 하지 않습니다.");
@@ -558,7 +569,7 @@
         const incorrectSet = new Set();
         let revOrder = [];
         let currentRevIndex = 0;
-        let revCardState = 0; // 0: front, 1: back
+        let revCardState = 0; 
 
         function addIncorrectWord(id) {
             incorrectSet.add(id);
@@ -632,7 +643,7 @@
             target.classList.add('flex');
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-gradient-to-r', 'from-purple-100', 'to-pink-100', 'text-purple-700', 'shadow-sm', 'dark:from-purple-900', 'dark:to-pink-900', 'dark:text-purple-300');
+                btn.classList.remove('bg-gradient-to-r', 'from-purple-100', 'to-pink-100', 'text-purple-700', 'shadow-sm', 'dark:from-purple-900/50', 'dark:to-pink-900/50', 'dark:text-purple-300');
                 btn.classList.add('text-slate-500', 'dark:text-slate-400');
             });
             
@@ -773,7 +784,6 @@
         function startQuiz(mode) {
             quizMode = mode; quizScore = 0; currentQuizIndex = 0; clearTimeout(quizTimeout);
             
-            // Randomly select 10 words
             currentQuizQuestions = [...vocabData].sort(() => Math.random() - 0.5).slice(0, TOTAL_QUIZ_QUESTIONS).map(targetWord => {
                 let options = [targetWord, ...[...vocabData].filter(w => w.id !== targetWord.id).sort(() => Math.random() - 0.5).slice(0,3)].sort(() => Math.random() - 0.5);
                 return { target: targetWord, options: options };
@@ -790,13 +800,16 @@
             renderQuizQuestion();
         }
 
+        let spellingFailed = false;
+
         function renderQuizQuestion() {
             clearTimeout(quizTimeout);
+            spellingFailed = false;
             const qData = currentQuizQuestions[currentQuizIndex];
             const qEl = document.getElementById('quiz-question');
             
-            if(quizMode === 'eng2kor' || quizMode === 'spelling') qEl.innerHTML = qData.target.kor;
-            else if(quizMode === 'kor2eng') qEl.innerHTML = qData.target.kor;
+            if(quizMode === 'eng2kor') qEl.innerHTML = qData.target.eng;
+            else if(quizMode === 'kor2eng' || quizMode === 'spelling') qEl.innerHTML = qData.target.kor;
             else if(quizMode === 'def2eng') qEl.innerHTML = `"${qData.target.def}"`;
             else qEl.innerHTML = qData.target.blankEx.replace('_______', '<span class="text-indigo-400 underline decoration-4 underline-offset-4">_______</span>');
             
@@ -807,20 +820,17 @@
             const fbEl = document.getElementById('quiz-feedback'); fbEl.classList.add('hidden'); fbEl.classList.remove('pop-animation');
 
             if (quizMode === 'spelling') {
-                // Spelling Input UI
                 optsEl.innerHTML = `
-                    <div class="flex flex-col gap-3 w-full">
+                    <div class="flex flex-col gap-3 w-full mt-auto">
                         <input type="text" id="spell-input" class="w-full border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-xl font-black text-center focus:border-indigo-500 outline-none dark:bg-slate-700 dark:text-white" placeholder="영단어를 입력하세요" autocomplete="off" autocorrect="off" autocapitalize="none">
                         <button onclick="checkSpelling(${qData.target.id})" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl hover:bg-indigo-700 shadow-sm active:scale-95 transition-transform">정답 확인</button>
                     </div>
                 `;
-                // Add Enter key listener
                 document.getElementById('spell-input').addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') checkSpelling(qData.target.id);
                 });
                 setTimeout(() => document.getElementById('spell-input').focus(), 100);
             } else {
-                // Multiple Choice UI
                 qData.options.forEach((opt, idx) => {
                     const btn = document.createElement('button');
                     const optText = quizMode === 'eng2kor' ? opt.kor : opt.eng;
@@ -837,23 +847,21 @@
             
             if (isCorrect) {
                 quizScore++;
-                const expGain = quizMode === 'spelling' ? 15 : 10; // Bonus for spelling
-                addExp(expGain); 
+                addExp(10); 
                 
-                if(btnEl) { // for buttons
+                if(btnEl) { 
                     btnEl.className = 'w-full bg-emerald-50 dark:bg-emerald-900/30 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 font-bold py-3 px-4 rounded-xl text-left flex items-center gap-3 shadow-md text-sm';
                     btnEl.querySelector('span').className = 'bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center font-black shrink-0 text-xs';
                 }
                 fbEl.innerHTML = "<i class='fa-solid fa-face-laugh-beam mr-1'></i>정답입니다!";
                 fbEl.className = "absolute inset-x-4 top-4 z-10 p-3 rounded-xl text-center font-black text-lg shadow-md border pop-animation block bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-800 dark:text-emerald-100 dark:border-emerald-600";
             } else {
-                addIncorrectWord(tgtId); // ADD TO REVIEW NOTE
+                addIncorrectWord(tgtId); 
                 
                 if(btnEl) {
                     btnEl.className = 'w-full bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-500 text-rose-800 dark:text-rose-300 font-bold py-3 px-4 rounded-xl text-left flex items-center gap-3 shake-animation shadow-md text-sm';
                     btnEl.querySelector('span').className = 'bg-rose-500 text-white w-6 h-6 rounded flex items-center justify-center font-black shrink-0 text-xs';
                     
-                    // Highlight correct option
                     document.querySelectorAll('.quiz-btn').forEach(b => {
                         if (b.innerText.includes(correctText)) {
                             b.className = 'w-full bg-emerald-50/50 dark:bg-emerald-900/20 border-2 border-emerald-400 border-dashed text-emerald-700 dark:text-emerald-400 font-bold py-3 px-4 rounded-xl text-left flex items-center gap-3 text-sm';
@@ -862,7 +870,7 @@
                     });
                 }
                 
-                fbEl.innerHTML = quizMode === 'spelling' ? `<span class="block text-sm mb-1">정답: ${correctText}</span><i class='fa-solid fa-face-frown mr-1'></i>틀렸습니다.` : "<i class='fa-solid fa-face-frown mr-1'></i>틀렸습니다.";
+                fbEl.innerHTML = "<i class='fa-solid fa-face-frown mr-1'></i>틀렸습니다.";
                 fbEl.className = "absolute inset-x-4 top-4 z-10 p-3 rounded-xl text-center font-black text-lg shadow-md border block bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-800 dark:text-rose-100 dark:border-rose-600";
             }
             
@@ -878,17 +886,39 @@
 
         function checkSpelling(tgtId) {
             const input = document.getElementById('spell-input');
-            if(!input) return;
+            if(!input || input.disabled) return;
+            
             const val = input.value.trim().toLowerCase();
             const correctText = currentQuizQuestions[currentQuizIndex].target.eng;
-            input.disabled = true;
             
             if(val === correctText.toLowerCase()) {
+                input.disabled = true;
                 input.className = "w-full border-4 border-emerald-500 bg-emerald-50 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-xl px-4 py-3 text-xl font-black text-center";
-                handleQuizResult(true, tgtId, null, correctText);
+                
+                const fbEl = document.getElementById('quiz-feedback');
+                if (!spellingFailed) {
+                    quizScore++;
+                    addExp(15); 
+                }
+                
+                fbEl.innerHTML = "<i class='fa-solid fa-face-laugh-beam mr-1'></i>정답입니다!";
+                fbEl.className = "absolute inset-x-4 top-4 z-10 p-3 rounded-xl text-center font-black text-lg shadow-md border pop-animation block bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-800 dark:text-emerald-100 dark:border-emerald-600";
+                
+                document.getElementById('quiz-score').textContent = quizScore * 10;
+                quizTimeout = setTimeout(nextQuizQuestion, 1500);
             } else {
+                spellingFailed = true;
                 input.className = "w-full border-4 border-rose-500 bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-300 rounded-xl px-4 py-3 text-xl font-black text-center shake-animation";
-                handleQuizResult(false, tgtId, null, correctText);
+                setTimeout(() => input.classList.remove('shake-animation'), 400);
+                
+                addIncorrectWord(tgtId); 
+                
+                const fbEl = document.getElementById('quiz-feedback');
+                fbEl.innerHTML = `<span class="block text-sm mb-1 text-slate-600 dark:text-slate-300">정답: <span class="text-rose-600 dark:text-rose-400 font-black">${correctText}</span></span><i class='fa-solid fa-pen mr-1'></i>보고 다시 적어보세요!`;
+                fbEl.className = "absolute inset-x-4 top-4 z-10 p-3 rounded-xl text-center font-black text-lg shadow-md border block bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-900/80 dark:text-rose-100 dark:border-rose-600";
+                
+                input.value = ''; 
+                input.focus();
             }
         }
 
@@ -1045,7 +1075,7 @@
             const containerHeight = document.getElementById('game-defense-play').querySelector('.relative').clientHeight;
             if (fallingY > containerHeight - 60) { 
                 defLives--; updateDefUI();
-                addIncorrectWord(currentDefTgt.id); // ADD TO REVIEW NOTE
+                addIncorrectWord(currentDefTgt.id); 
 
                 const pa = document.getElementById('game-defense-play').querySelector('.relative');
                 pa.classList.add('border-rose-500'); 
@@ -1067,7 +1097,7 @@
                 setTimeout(() => { exp.classList.add('hidden'); spawnDefWord(); }, 400);
             } else {
                 defLives--; updateDefUI();
-                addIncorrectWord(currentDefTgt.id); // ADD TO REVIEW NOTE
+                addIncorrectWord(currentDefTgt.id); 
                 
                 const pa = document.getElementById('game-defense-play').querySelector('.relative');
                 pa.classList.add('border-rose-500'); 
@@ -1091,7 +1121,7 @@
             document.getElementById('game-defense-over').classList.add('flex');
             document.getElementById('def-final-score').textContent = defScore;
             
-            addExp(defScore); // Earn EXP based on score
+            addExp(defScore); 
             document.getElementById('def-exp-msg').textContent = `+${defScore} EXP 획득!`;
         }
 
