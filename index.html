@@ -23,11 +23,11 @@
     <style>
         body { overflow: hidden; touch-action: manipulation; }
         
-        /* 3D Flip Card Styles */
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
+        /* 3D Flip Card Styles - Added Webkit Prefixes to prevent text bleeding */
+        .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
         .transition-transform-700 { transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         
         /* Details Fade In */
@@ -68,10 +68,41 @@
         .card-back { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
         .dark .card-back { background: linear-gradient(135deg, #4c1d95 0%, #9d174d 100%); }
 
+        /* Game Card Styles (Memory Game) */
+        .memory-card { cursor: pointer; }
+        .memory-card-inner {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
+        
+        .memory-card-front, .memory-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 100% Hack to prevent text bleeding on unflipped cards */
+        .memory-card:not(.flipped):not(.matched) .memory-card-back { visibility: hidden; transition: visibility 0s linear 0.2s; }
+        .memory-card.flipped .memory-card-back, .memory-card.matched .memory-card-back { visibility: visible; transition: visibility 0s linear 0s; }
+
         .memory-card-front { background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%); color: white; font-size: 2rem; }
         .dark .memory-card-front { background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%); }
         
-        .memory-card-back { background-color: white; transform: rotateY(180deg); border: 2px solid #ddd6fe; color: #4c1d95; }
+        .memory-card-back { background-color: white; transform: rotateY(180deg); -webkit-transform: rotateY(180deg); border: 2px solid #ddd6fe; color: #4c1d95; font-weight: 700; word-break: keep-all; }
         .dark .memory-card-back { background-color: #1e293b; border-color: #4c1d95; color: #e9d5ff; }
         
         .memory-card.matched .memory-card-back { background-color: #dcfce7; border-color: #4ade80; color: #166534; }
@@ -80,9 +111,10 @@
 </head>
 <body class="bg-indigo-50/50 dark:bg-slate-900 h-screen w-screen flex flex-col text-slate-700 dark:text-slate-200 transition-colors duration-300">
 
-    <!-- Header -->
+    <!-- Header (Gamification & Dark Mode) -->
     <header class="flex-shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm border-b border-indigo-50 dark:border-slate-700 transition-colors duration-300">
         <div class="max-w-5xl mx-auto px-4 py-2 flex justify-between items-center">
+            <!-- Logo -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-pink-300 to-purple-400 dark:from-pink-600 dark:to-purple-700 rounded-xl flex items-center justify-center text-white shadow-sm transform -rotate-6">
                     <i class="fa-solid fa-palette text-xl"></i>
@@ -93,6 +125,7 @@
                 </div>
             </div>
 
+            <!-- Gamification Status & Dark Mode -->
             <div class="flex items-center gap-3">
                 <div class="flex flex-col items-end">
                     <span class="text-[10px] font-black text-slate-600 dark:text-slate-300" id="user-level">Lv.1 초보자</span>
@@ -123,6 +156,7 @@
             <button onclick="switchTab('game')" id="tab-game" class="nav-btn flex-1 min-w-[70px] py-2 px-1 rounded-lg font-bold text-[11px] sm:text-sm transition-all duration-300 whitespace-nowrap">
                 <i class="fa-solid fa-gamepad sm:mr-1 block sm:inline mb-1 sm:mb-0"></i>게임
             </button>
+            <!-- Review Tab -->
             <button onclick="switchTab('review')" id="tab-review" class="nav-btn flex-1 min-w-[70px] py-2 px-1 rounded-lg font-bold text-[11px] sm:text-sm transition-all duration-300 whitespace-nowrap relative">
                 <i class="fa-solid fa-book-medical sm:mr-1 block sm:inline mb-1 sm:mb-0"></i>오답노트
                 <span id="review-badge" class="absolute top-1 right-1 sm:top-2 sm:right-2 w-2 h-2 bg-rose-500 rounded-full hidden"></span>
@@ -155,10 +189,12 @@
                         </button>
                         
                         <!-- Center Content -->
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900/50 text-purple-500 dark:text-purple-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
-                            <i class="fa-solid fa-language"></i>
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8"> 
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900/50 text-purple-500 dark:text-purple-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
+                                <i class="fa-solid fa-language"></i>
+                            </div>
+                            <h2 id="card-eng" class="text-5xl sm:text-6xl font-black text-slate-800 dark:text-white tracking-tight break-words px-2 m-0"></h2>
                         </div>
-                        <h2 id="card-eng" class="text-5xl sm:text-6xl font-black text-slate-800 dark:text-white tracking-tight break-words px-2 m-0"></h2>
                         
                         <!-- Instruction (Absolute at bottom) -->
                         <div class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-full text-slate-500 dark:text-slate-300 font-bold text-xs flex items-center gap-2">
@@ -168,12 +204,15 @@
                     
                     <!-- Back -->
                     <div onclick="handleCardClick('back')" class="absolute w-full h-full backface-hidden card-back text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden relative">
+                        
                         <!-- Center Content -->
-                        <h3 id="card-kor" class="text-6xl sm:text-7xl font-black text-white drop-shadow-md z-10 transition-all duration-500 mb-0 leading-tight"></h3>
-                        <div id="card-def-container" class="details-hidden w-full z-10 flex flex-col gap-2">
-                            <div class="w-full bg-black/20 rounded-2xl p-4 sm:p-6 backdrop-blur-md border border-white/10 text-left shadow-inner">
-                                <p class="text-xs text-purple-200 uppercase tracking-widest mb-2 font-bold flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 영영 풀이</p>
-                                <p id="card-def" class="text-base sm:text-lg font-bold leading-snug text-white drop-shadow-sm"></p>
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8 z-10"> 
+                            <h3 id="card-kor" class="text-6xl sm:text-7xl font-black text-white drop-shadow-md transition-all duration-500 mb-0 leading-tight"></h3>
+                            <div id="card-def-container" class="details-hidden w-full flex flex-col gap-2">
+                                <div class="w-full bg-black/20 rounded-2xl p-4 sm:p-6 backdrop-blur-md border border-white/10 text-left shadow-inner">
+                                    <p class="text-xs text-purple-200 uppercase tracking-widest mb-2 font-bold flex items-center gap-2"><i class="fa-solid fa-book-open"></i> 영영 풀이</p>
+                                    <p id="card-def" class="text-base sm:text-lg font-bold leading-snug text-white drop-shadow-sm"></p>
+                                </div>
                             </div>
                         </div>
                         
@@ -211,12 +250,15 @@
                 <div id="ex-flashcard" class="relative w-full flex-1 transform-style-3d transition-transform-700 cursor-pointer min-h-0">
                     <!-- Front -->
                     <div onclick="handleExCardClick('front')" class="absolute w-full h-full backface-hidden card-front border-2 border-slate-100 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-lg transition-all duration-300 relative">
+                        
                         <!-- Center Content -->
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-pink-100 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
-                            <i class="fa-solid fa-pen-nib"></i>
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8">
+                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-pink-100 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 rounded-full flex items-center justify-center text-2xl sm:text-3xl mb-4 float-animation">
+                                <i class="fa-solid fa-pen-nib"></i>
+                            </div>
+                            <h2 id="ex-card-eng" class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white mb-2 tracking-tight m-0"></h2>
+                            <h3 id="ex-card-kor" class="text-lg sm:text-xl font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-xl mt-4"></h3>
                         </div>
-                        <h2 id="ex-card-eng" class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-white mb-2 tracking-tight m-0"></h2>
-                        <h3 id="ex-card-kor" class="text-lg sm:text-xl font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1 rounded-xl"></h3>
                         
                         <!-- Instruction (Absolute) -->
                         <div class="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-pink-50 dark:bg-pink-900/30 px-4 py-2 rounded-full text-pink-600 dark:text-pink-400 font-bold text-xs flex items-center gap-2 shadow-sm border border-pink-100 dark:border-pink-800">
@@ -232,14 +274,16 @@
                         </button>
 
                         <!-- Center Content -->
-                        <i class="fa-solid fa-quote-left text-3xl sm:text-4xl text-white/30 mb-4"></i>
-                        <p id="ex-card-blank" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full transition-opacity duration-300 break-keep"></p>
-                        
-                        <div id="ex-card-full-container" class="hidden flex flex-col items-center w-full">
-                            <p id="ex-card-full" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full break-keep mb-4 sm:mb-6"></p>
-                            <div class="bg-black/20 px-4 py-3 rounded-2xl border border-white/10 w-full shadow-inner">
-                                <p class="text-[10px] sm:text-xs text-pink-200 font-bold uppercase tracking-widest mb-1">해석</p>
-                                <p id="ex-card-kor-ex" class="text-sm sm:text-lg text-white font-medium break-keep"></p>
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8 z-10">
+                            <i class="fa-solid fa-quote-left text-3xl sm:text-4xl text-white/30 mb-4 flex-shrink-0"></i>
+                            <p id="ex-card-blank" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full transition-opacity duration-300 break-keep"></p>
+                            
+                            <div id="ex-card-full-container" class="hidden flex flex-col items-center w-full">
+                                <p id="ex-card-full" class="text-xl sm:text-3xl font-bold leading-relaxed text-white drop-shadow-md w-full break-keep mb-4 sm:mb-6"></p>
+                                <div class="bg-black/20 px-4 py-3 rounded-2xl border border-white/10 w-full shadow-inner">
+                                    <p class="text-[10px] sm:text-xs text-pink-200 font-bold uppercase tracking-widest mb-1">해석</p>
+                                    <p id="ex-card-kor-ex" class="text-sm sm:text-base text-white font-medium break-keep"></p>
+                                </div>
                             </div>
                         </div>
                         
@@ -352,7 +396,7 @@
             <!-- Memory Game -->
             <div id="game-memory-area" class="hidden w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-2 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm flex-shrink-0">
-                    <button onclick="backToGamesMenu()" class="text-slate-500 text-xs font-bold bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-arrow-left mr-1"></i>메뉴</button>
+                    <button onclick="backToGamesMenu()" class="text-rose-500 dark:text-rose-400 text-xs font-bold bg-rose-50 dark:bg-rose-900/30 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-xmark mr-1"></i>종료</button>
                     <div class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg flex items-center gap-2"><span class="text-[10px] text-indigo-500 font-bold">시도</span><span id="memory-moves" class="font-black text-indigo-700 dark:text-indigo-400">0</span></div>
                 </div>
                 <div id="memory-board" class="grid grid-cols-4 gap-2 w-full flex-1 min-h-[250px] perspective-1000"></div>
@@ -372,8 +416,11 @@
 
             <div id="game-defense-play" class="hidden w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-2 px-1 flex-shrink-0">
-                    <div class="bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl flex gap-1 text-rose-500 text-sm shadow-sm" id="def-lives"></div>
-                    <div class="bg-slate-800 dark:bg-slate-950 text-white font-black text-sm px-4 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">SCORE <span id="def-score" class="text-yellow-400">0</span></div>
+                    <button onclick="backToGamesMenu()" class="bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm"><i class="fa-solid fa-xmark mr-1"></i>종료</button>
+                    <div class="flex gap-2">
+                        <div class="bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl flex gap-1 text-rose-500 text-sm shadow-sm" id="def-lives"></div>
+                        <div class="bg-slate-800 dark:bg-slate-950 text-white font-black text-sm px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm"><i class="fa-solid fa-star text-yellow-400 text-[10px]"></i> <span id="def-score" class="text-yellow-400">0</span></div>
+                    </div>
                 </div>
                 
                 <div class="relative w-full flex-1 rounded-2xl overflow-hidden border-2 border-slate-800 bg-slate-900 min-h-[200px]">
@@ -431,7 +478,7 @@
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                         
-                        <div class="flex-1 flex flex-col items-center justify-center w-full">
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8">
                             <h2 id="rev-card-eng" class="text-5xl sm:text-6xl font-black text-rose-600 dark:text-rose-400 tracking-tight break-words px-2 m-0"></h2>
                         </div>
                         
@@ -443,7 +490,7 @@
                     <!-- Back -->
                     <div onclick="handleRevCardClick('back')" class="absolute w-full h-full backface-hidden bg-gradient-to-br from-rose-400 to-pink-500 dark:from-rose-700 dark:to-pink-900 text-white rounded-3xl rotate-y-180 flex flex-col items-center justify-center p-6 text-center shadow-xl border border-white/20 overflow-hidden relative">
                         
-                        <div class="flex-1 flex flex-col items-center justify-center w-full">
+                        <div class="flex-1 flex flex-col items-center justify-center w-full pb-8 z-10">
                             <h3 id="rev-card-kor" class="text-4xl sm:text-6xl font-black text-white drop-shadow-md transition-all duration-500 mb-4 leading-tight"></h3>
                             <p id="rev-card-def" class="text-base sm:text-lg font-bold leading-snug text-white/90 drop-shadow-sm px-5 bg-black/20 py-4 rounded-2xl border border-white/10"></p>
                         </div>
@@ -776,7 +823,7 @@
         function prevExCard() { resetExCardToFront(); setTimeout(() => { currentExIndex = (currentExIndex - 1 + exOrder.length) % exOrder.length; renderExCard(); }, 200); }
 
 
-        /* ================= 3. QUIZ LOGIC (Includes Spelling) ================= */
+        /* ================= 3. QUIZ LOGIC ================= */
         let currentQuizQuestions = [], currentQuizIndex = 0, quizScore = 0, quizMode = '';
         let quizTimeout; 
         const TOTAL_QUIZ_QUESTIONS = 10;
@@ -973,6 +1020,7 @@
                 document.getElementById(id).classList.remove('flex');
             });
             document.getElementById('games-menu').classList.remove('hidden');
+            document.getElementById('games-menu').classList.add('flex');
         }
 
         /* MEMORY GAME */
@@ -1125,8 +1173,12 @@
             document.getElementById('def-exp-msg').textContent = `+${defScore} EXP 획득!`;
         }
 
-        function quitDefenseGame() {
-            if(defLoop) clearInterval(defLoop); defLoop = null;
+        function quitDefenseGameToMenu() {
+            quitDefenseGame();
+            document.getElementById('game-defense-play').classList.add('hidden');
+            document.getElementById('game-defense-play').classList.remove('flex');
+            document.getElementById('games-menu').classList.remove('hidden');
+            document.getElementById('games-menu').classList.add('flex');
         }
 
         window.onload = () => { 
